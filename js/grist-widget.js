@@ -37,11 +37,11 @@
           { name: 'URL', type: 'Text', title: 'URL du dataset', optional: true },
           { name: 'Mots_Cles', type: 'ChoiceList', title: 'Mots-clés', optional: false },
           { name: 'Statut_Publication', type: 'Choice', title: 'Statut de publication', optional: true },
-          { name: 'Niveau_Sensibilite', type: 'Choice', title: 'Niveau de sensibilité', optional: true },
-          { name: 'Domaine_Fonctionnel', type: 'Reference', title: 'Domaine fonctionnel', optional: true },
-          { name: 'Bureau_Producteur', type: 'Reference', title: 'Bureau producteur', optional: true },
-          { name: 'Systeme_Information', type: 'Reference', title: 'Système d\'information', optional: true },
-          { name: 'Contact', type: 'Reference', title: 'Contact principal', optional: true },
+          { name: 'Niveau_Sensibilite', type: 'ChoiceList', title: 'Niveau de sensibilité', optional: true },
+          { name: 'Domaine_Fonctionnel', type: 'Reference', title: 'Domaine fonctionnel (Ref_Theme)', optional: true },
+          { name: 'Bureau_Producteur', type: 'Reference', title: 'Bureau producteur (Ref_Entite)', optional: true },
+          { name: 'Systeme_Information', type: 'ReferenceList', title: 'Système d\'information (Ref_InformationSystem)', optional: true },
+          { name: 'Contact', type: 'Reference', title: 'Contact principal (Ref_Utilisateur)', optional: true },
           { name: 'Statut_Qualification', type: 'Choice', title: 'Statut de qualification', optional: true },
         ],
       });
@@ -74,9 +74,31 @@
     // Charge Ref_Utilisateur pour peupler le select Contact
     grist.getTable('Ref_Utilisateur').fetch().then(function (users) {
       populateSelect('contact', users.id, users.Nom, users.Prenom);
-      refTablesLoaded = true;
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Utilisateur :', err.message);
+    });
+
+    // Charge Ref_Entite pour peupler le select Bureau_Producteur
+    grist.getTable('Ref_Entite').fetch().then(function (entites) {
+      populateSelect('bureau-producteur', entites.id, entites.Nom || entites.Nom_Complet || entites.Nom_Principal);
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_Entite :', err.message);
+      // Fallback : la liste en dur dans le HTML reste
+    });
+
+    // Charge Ref_Theme pour peupler le select Domaine_Fonctionnel
+    grist.getTable('Ref_Theme').fetch().then(function (themes) {
+      populateSelect('domaine-fonctionnel', themes.id, themes.Nom || themes.Nom_Complet || themes.Nom_Principal);
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_Theme :', err.message);
+      // Fallback : la liste en dur dans le HTML reste
+    });
+
+    // Charge Ref_InformationSystem pour peupler le select Systeme_Information (multi-select)
+    grist.getTable('Ref_InformationSystem').fetch().then(function (systems) {
+      populateMultiSelect('systeme-information', systems.id, systems.Nom || systems.Nom_Complet || systems.Nom_Principal);
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_InformationSystem :', err.message);
       // Fallback : la liste en dur dans le HTML reste
     });
   }
@@ -102,6 +124,26 @@
       option.value = String(ids[i]);
       var label = prenoms && prenoms[i] ? prenoms[i] + ' ' + noms[i] : noms[i];
       option.textContent = label;
+      select.appendChild(option);
+    }
+  }
+
+  /**
+   * Remplit un <select multiple> avec les données d'une table Grist.
+   * @param {string} selectId - ID de l'élément <select>
+   * @param {number[]} ids - Tableau des IDs de records
+   * @param {string[]} noms - Tableau des noms
+   */
+  function populateMultiSelect(selectId, ids, noms) {
+    var select = document.getElementById(selectId);
+    if (!select) return;
+
+    select.innerHTML = '';
+
+    for (var i = 0; i < ids.length; i++) {
+      var option = document.createElement('option');
+      option.value = String(ids[i]);
+      option.textContent = noms[i];
       select.appendChild(option);
     }
   }

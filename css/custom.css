@@ -100,3 +100,7 @@ body.mode-express .fr-collapse {
   display: inline-block;
   margin-right: 0.5rem;
 }
+
+.fr-hint-text {
+  padding-left: 5px;
+}
