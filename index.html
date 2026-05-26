@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Catalogue de données — MEF</title>
+  <meta name="description" content="Formulaire de catalogage DCAT-AP pour le Ministère de l'Économie et des Finances">
+
+  <!-- DSFR -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/dsfr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/icon/dsfr-icons.min.css">
+  <link rel="stylesheet" href="css/custom.css">
+
+  <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/dsfr.min.js"></script>
+  <script>
+    // Gestionnaire d'accordéons DSFR en vanilla JS (fallback si le CDN JS ne charge pas)
+    document.addEventListener('DOMContentLoaded', function () {
+      var accordions = document.querySelectorAll('.fr-accordion');
+      accordions.forEach(function (accordion) {
+        var btn = accordion.querySelector('.fr-accordion__btn');
+        var content = accordion.querySelector('.fr-collapse');
+        if (!btn || !content) return;
+
+        btn.addEventListener('click', function () {
+          var isExpanded = btn.getAttribute('aria-expanded') === 'true';
+          btn.setAttribute('aria-expanded', String(!isExpanded));
+          content.classList.toggle('fr-collapse--expanded');
+        });
+      });
+    });
+  </script>
+
+  <!-- Grist Plugin API (uniquement dans le contexte Grist) -->
+  <script src="https://docs.getgrist.com/grist-plugin-api.js"></script>
+
+  <script src="js/formulaire.js" defer></script>
+  <script src="js/grist-widget.js" defer></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="fr-header" role="banner">
+    <div class="fr-container fr-container--fluid">
+      <div class="fr-header__body">
+        <div class="fr-grid-row fr-grid-row--middle">
+          <div class="fr-col-12 fr-col-md-3 fr-header__logo">
+            <a class="fr-header__branding" href="#">
+              <div class="fr-header__logo">
+                <img class="fr-responsive-img" src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/logo/france.png" alt="République Française" width="48" height="48">
+              </div>
+              <p class="fr-header__operator">Ministère de l'Économie et des Finances</p>
+            </a>
+          </div>
+          <div class="fr-col-12 fr-col-md-9 fr-header__top">
+            <div class="fr-header__navbar">
+              <div class="fr-btns-group fr-btns-group--inline fr-btns-group--icon-text fr-btns-group--right">
+                <button class="fr-btn" id="toggle-mode" type="button" aria-pressed="false">
+                  <i class="fr-icon-rocket-2-line fr-icon--lg" aria-hidden="true"></i>
+                  Mode <span id="mode-label">Avancé</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main -->
+  <main class="fr-main" role="main">
+    <div class="fr-container fr-my-4w">
+      <div class="fr-grid-row">
+        <div class="fr-col-12 fr-col-lg-10 fr-col-lg-offset-1">
+
+          <h1 class="fr-h1">Catalogage de données</h1>
+          <p class="fr-text--lg fr-mb-4w">
+            Remplissez les informations pour cataloguer un jeu de données selon le standard DCAT-AP.
+            Les champs marqués <span class="fr-text--bold" aria-hidden="true">*</span> sont obligatoires.
+          </p>
+
+          <!-- Messages de feedback -->
+          <div id="form-messages" class="fr-messages-group" aria-live="polite"></div>
+
+          <form id="catalogue-form" novalidate>
+
+            <!-- Section 1 — Identification (Niveau 1, toujours visible) -->
+            <fieldset class="fr-fieldset" aria-labelledby="section1-legend">
+              <legend class="fr-fieldset__legend" id="section1-legend">
+                <h2 class="fr-h5">Niveau 1 - Identification</h2>
+                <p class="fr-hint-text">Informations de base pour rendre le dataset découvrable. Champs obligatoires.</p>
+              </legend>
+              <div class="fr-fieldset__element">
+                <div class="fr-grid-row fr-grid-row--gutters">
+                  <div class="fr-col-12 fr-col-md-6">
+                    <div class="fr-input-group">
+                      <label class="fr-label" for="titre" aria-required="true">
+                        Titre <span class="fr-text--bold" aria-hidden="true">*</span>
+                      </label>
+                      <input class="fr-input" type="text" id="titre" name="titre" required aria-required="true" autocomplete="off">
+                    </div>
+                  </div>
+                  <div class="fr-col-12 fr-col-md-6">
+                    <div class="fr-input-group">
+                      <label class="fr-label" for="url" autocomplete="off">
+                        URL du dataset
+                      </label>
+                      <input class="fr-input" type="url" id="url" name="url" autocomplete="off">
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="fr-fieldset__element">
+                <div class="fr-input-group">
+                  <label class="fr-label" for="description" aria-required="true">
+                    Description <span class="fr-text--bold" aria-hidden="true">*</span>
+                  </label>
+                  <textarea class="fr-input" id="description" name="description" rows="4" required aria-required="true" placeholder="2-3 phrases : contenu, utilité, période couverte"></textarea>
+                </div>
+              </div>
+              <div class="fr-fieldset__element">
+                <div class="fr-input-group">
+                  <label class="fr-label" for="mots-cles" aria-required="true">
+                    Mots-clés <span class="fr-text--bold" aria-hidden="true">*</span>
+                  </label>
+                  <input class="fr-input" type="text" id="mots-cles" name="mots-cles" required aria-required="true" placeholder="ex: fiscalité, IA, budget, 2025" autocomplete="off">
+                  <p class="fr-hint-text">3-5 mots-clés thématiques, séparés par des virgules.</p>
+                </div>
+              </div>
+            </fieldset>
+
+            <!-- Section 2 — Classification (Niveau 2, accordéon) -->
+            <section class="fr-accordion" id="section2-accordion">
+              <h3 class="fr-accordion__title">
+                <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="section2-content">
+                  <span class="fr-text--bold">Niveau 2 - Classification</span>
+                  Qualifier le dataset pour le tri et les filtres
+                </button>
+              </h3>
+              <div class="fr-collapse" id="section2-content">
+                <fieldset class="fr-fieldset" aria-labelledby="section2-legend">
+                  <legend class="fr-fieldset__legend" id="section2-legend">
+                    <h2 class="fr-h5">Classification</h2>
+                  </legend>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="statut-publication">Statut de publication</label>
+                          <select class="fr-select" id="statut-publication" name="statut-publication">
+                            <option value="" disabled selected>Sélectionner un statut</option>
+                            <option value="donnees-ouvertes">Données ouvertes</option>
+                            <option value="donnees-fermees">Données fermées</option>
+                            <option value="donnees-reglementees">Données réglementées</option>
+                          </select>
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="niveau-sensibilite">Niveau de sensibilité</label>
+                          <select class="fr-select" id="niveau-sensibilite" name="niveau-sensibilite">
+                            <option value="" disabled selected>Sélectionner un niveau</option>
+                            <option value="open-data">Open data</option>
+                            <option value="diffusion-restreinte">Diffusion restreinte</option>
+                            <option value="donnees-personnelles-rgpd">Données personnelles (RGPD)</option>
+                            <option value="diffusion-contrainee">Diffusion contrainte</option>
+                            <option value="confidentiel">Confidentiel</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-select-group">
+                      <label class="fr-label" for="domaine-fonctionnel">Domaine fonctionnel</label>
+                      <select class="fr-select" id="domaine-fonctionnel" name="domaine-fonctionnel">
+                        <option value="" disabled selected>Sélectionner un domaine</option>
+                        <option value="politique-fiscale">Politique fiscale</option>
+                        <option value="politique-depenses">Politique de dépenses</option>
+                        <option value="gestion-actifs">Gestion des actifs</option>
+                        <option value="gestion-dettes">Gestion des dettes</option>
+                        <option value="controle">Contrôle</option>
+                        <option value="relation-usager">Relation usager</option>
+                        <option value="outils-metier">Outils métier</option>
+                        <option value="support">Support</option>
+                        <option value="innovation">Innovation</option>
+                        <option value="transversal">Transversal</option>
+                      </select>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </section>
+
+            <!-- Section 3 — Organisation (Niveau 3, accordéon) -->
+            <section class="fr-accordion" id="section3-accordion">
+              <h3 class="fr-accordion__title">
+                <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="section3-content">
+                  <span class="fr-text--bold">Niveau 3 - Organisation</span>
+                  Rattacher le dataset à la structure ministérielle
+                </button>
+              </h3>
+              <div class="fr-collapse" id="section3-content">
+                <fieldset class="fr-fieldset" aria-labelledby="section3-legend">
+                  <legend class="fr-fieldset__legend" id="section3-legend">
+                    <h2 class="fr-h5">Organisation</h2>
+                  </legend>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-select-group">
+                      <label class="fr-label" for="bureau-producteur">Bureau producteur</label>
+                      <select class="fr-select" id="bureau-producteur" name="bureau-producteur">
+                        <option value="" disabled selected>Sélectionner un bureau</option>
+                        <option value="SNUM">SNUM — Bureau de l'innovation et de la data</option>
+                        <option value="AMDAC">AMDAC — Assistance au management et au contrôle de l'action comptable</option>
+                        <option value="DGP">DGP — Direction générale des pensions</option>
+                        <option value="SG">SG — Secrétariat général</option>
+                        <option value="DGFIP">DGFIP — Direction générale des finances publiques</option>
+                        <option value="DGE">DGE — Direction générale des entreprises</option>
+                        <option value="DAJ">DAJ — Direction des affaires juridiques</option>
+                        <option value="DGEFI">DGEFI — Direction générale de l'administration et du finances internes</option>
+                        <option value="DINUM">DINUM — Direction interministérielle du numérique</option>
+                        <option value="autre">Autre</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-select-group">
+                      <label class="fr-label" for="systeme-information">Système d'information</label>
+                      <select class="fr-select" id="systeme-information" name="systeme-information">
+                        <option value="" disabled selected>Sélectionner un système d'information</option>
+                        <option value="chorus">Chorus</option>
+                        <option value="liocomvac">LIOCOMVAC</option>
+                        <option value="allegro">Allegro</option>
+                        <option value="sap">SAP</option>
+                        <option value="mesurfr">Mesur'fr</option>
+                        <option value="e-marches">E-marchés</option>
+                        <option value="autre">Autre</option>
+                      </select>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </section>
+
+            <!-- Section 4 — Contact (Niveau 4, accordéon) -->
+            <section class="fr-accordion" id="section4-accordion">
+              <h3 class="fr-accordion__title">
+                <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="section4-content">
+                  <span class="fr-text--bold">Niveau 4 - Contact</span>
+                  Désigner un interlocuteur ressource
+                </button>
+              </h3>
+              <div class="fr-collapse" id="section4-content">
+                <fieldset class="fr-fieldset" aria-labelledby="section4-legend">
+                  <legend class="fr-fieldset__legend" id="section4-legend">
+                    <h2 class="fr-h5">Contact</h2>
+                  </legend>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-select-group">
+                      <label class="fr-label" for="contact">Contact principal</label>
+                      <select class="fr-select" id="contact" name="contact">
+                        <option value="" disabled selected>Sélectionner un contact</option>
+                        <option value="user-1">Paul — SNUM</option>
+                        <option value="user-2">Marie — DGFIP</option>
+                        <option value="user-3">Jean — SG</option>
+                        <option value="user-4">Sophie — DGE</option>
+                        <option value="user-5">Luc — DAJ</option>
+                      </select>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </section>
+
+            <!-- Section 5 — Qualification (Niveau 5, lecture seule, auto-calculé) -->
+            <section class="fr-accordion" id="section5-accordion">
+              <h3 class="fr-accordion__title">
+                <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="section5-content">
+                  <span class="fr-text--bold">Niveau 5 - Qualification</span>
+                  Auto-évaluation de la maturité des métadonnées (calculé automatiquement)
+                </button>
+              </h3>
+              <div class="fr-collapse" id="section5-content">
+                <fieldset class="fr-fieldset" aria-labelledby="section5-legend">
+                  <legend class="fr-fieldset__legend" id="section5-legend">
+                    <h2 class="fr-h5">Qualification</h2>
+                    <p class="fr-hint-text">Ces champs sont calculés automatiquement en fonction des métadonnées saisies.</p>
+                  </legend>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-card fr-card--horizontal fr-card--sm fr-card--shadow" id="score-card">
+                          <div class="fr-card__body">
+                            <div class="fr-card__content">
+                              <h3 class="fr-card__title">Score de complétude</h3>
+                              <p class="fr-card__description" id="score-completude" aria-live="polite">0%</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-card fr-card--horizontal fr-card--sm fr-card--shadow" id="badge-card">
+                          <div class="fr-card__body">
+                            <div class="fr-card__content">
+                              <h3 class="fr-card__title">Badge de maturité</h3>
+                              <p class="fr-card__description" id="badge-maturite" aria-live="polite">—</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-select-group">
+                      <label class="fr-label" for="statut-qualification">Statut de qualification</label>
+                      <select class="fr-select" id="statut-qualification" name="statut-qualification">
+                        <option value="" disabled selected>Sélectionner un statut</option>
+                        <option value="en-cours">En cours</option>
+                        <option value="a-verifier-metier">À vérifier (métier)</option>
+                        <option value="qualifie">Qualifié</option>
+                        <option value="certifie">Certifié</option>
+                      </select>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </section>
+
+            <!-- Bouton de soumission -->
+            <div class="fr-my-4w fr-text--center">
+              <button type="submit" class="fr-btn fr-btn--lg" id="btn-submit">
+                <i class="fr-icon-save-line fr-icon--left" aria-hidden="true"></i>
+                Enregistrer
+              </button>
+            </div>
+
+          </form>
+
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="fr-footer" role="contentinfo">
+    <div class="fr-container">
+      <div class="fr-footer__body">
+        <div class="fr-grid-row fr-grid-row--start">
+          <div class="fr-col-12 fr-col-md-3">
+            <p class="fr-footer__brand">
+              <a href="#">
+                <img class="fr-responsive-img" src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/logo/france.png" alt="République Française" width="48" height="48">
+                <p class="fr-footer__operator-text">Ministère de l'Économie et des Finances</p>
+              </a>
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="fr-footer__content">
+        <p class="fr-footer__content-desc">Catalogue de données ministérielles — Standard DCAT-AP</p>
+      </div>
+    </div>
+  </footer>
+
+</body>
+</html>

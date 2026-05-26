@@ -1,0 +1,256 @@
+/**
+ * Widget Grist pour le formulaire de catalogage DCAT-AP
+ *
+ * Intègre le formulaire HTML dans Grist via le Grist Plugin API.
+ * Supporte la création et l'édition de records dans la table Catalogue.
+ *
+ * Utilisation dans Grist :
+ *   1. Déployer ce fichier sur GitHub Pages (HTTPS requis)
+ *   2. Dans Grist : Widget > URL personnalisée > coller l'URL du déploiement
+ *   3. Mapper les colonnes du formulaire sur les colonnes de la table Catalogue
+ */
+
+(function () {
+  'use strict';
+
+  var gristReady = false;
+  var currentTable = null;
+  var currentRecordId = null;
+  var refTablesLoaded = false;
+
+  // === Initialisation du widget Grist ===
+
+  function initGristWidget() {
+    // Vérifie si on est dans le contexte Grist
+    if (typeof grist === 'undefined') {
+      console.log('[Grist Widget] Mode hors Grist — le widget fonctionnera en mode standalone.');
+      return;
+    }
+
+    try {
+      // Demande l'accès complet (lecture + écriture)
+      grist.ready({
+        requiredAccess: 'full',
+        columns: [
+          { name: 'Titre', type: 'Text', title: 'Titre du dataset', optional: false },
+          { name: 'Description', type: 'Text', title: 'Description', optional: false },
+          { name: 'URL', type: 'Text', title: 'URL du dataset', optional: true },
+          { name: 'Mots_Cles', type: 'ChoiceList', title: 'Mots-clés', optional: false },
+          { name: 'Statut_Publication', type: 'Choice', title: 'Statut de publication', optional: true },
+          { name: 'Niveau_Sensibilite', type: 'Choice', title: 'Niveau de sensibilité', optional: true },
+          { name: 'Domaine_Fonctionnel', type: 'Reference', title: 'Domaine fonctionnel', optional: true },
+          { name: 'Bureau_Producteur', type: 'Reference', title: 'Bureau producteur', optional: true },
+          { name: 'Systeme_Information', type: 'Reference', title: 'Système d\'information', optional: true },
+          { name: 'Contact', type: 'Reference', title: 'Contact principal', optional: true },
+          { name: 'Statut_Qualification', type: 'Choice', title: 'Statut de qualification', optional: true },
+        ],
+      });
+
+      gristReady = true;
+
+      // Récupère la table courante
+      grist.selectedTable(function (table) {
+        currentTable = table;
+      });
+
+      // Charge les tables de référence (contacts, etc.)
+      loadRefTables();
+
+      // Écoute les changements de record
+      grist.onRecord(onRecordChange);
+
+      // Écoute les changements de données
+      grist.onRecords(onDataChange);
+
+      console.log('[Grist Widget] Widget initialisé avec succès.');
+    } catch (err) {
+      console.error('[Grist Widget] Erreur d\'initialisation :', err);
+    }
+  }
+
+  // === Chargement des tables de référence ===
+
+  function loadRefTables() {
+    // Charge Ref_Utilisateur pour peupler le select Contact
+    grist.getTable('Ref_Utilisateur').fetch().then(function (users) {
+      populateSelect('contact', users.id, users.Nom, users.Prenom);
+      refTablesLoaded = true;
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_Utilisateur :', err.message);
+      // Fallback : la liste en dur dans le HTML reste
+    });
+  }
+
+  /**
+   * Remplit un <select> avec les données d'une table Grist.
+   * @param {string} selectId - ID de l'élément <select>
+   * @param {number[]} ids - Tableau des IDs de records
+   * @param {string[]} noms - Tableau des noms (colonne Nom ou Nom_Complet)
+   * @param {string[]} prenoms - Tableau des prénoms (optionnel)
+   */
+  function populateSelect(selectId, ids, noms, prenoms) {
+    var select = document.getElementById(selectId);
+    if (!select) return;
+
+    // Garde l'option par défaut
+    var defaultOption = select.querySelector('option[value=""]');
+    select.innerHTML = '';
+    if (defaultOption) select.appendChild(defaultOption);
+
+    for (var i = 0; i < ids.length; i++) {
+      var option = document.createElement('option');
+      option.value = String(ids[i]);
+      var label = prenoms && prenoms[i] ? prenoms[i] + ' ' + noms[i] : noms[i];
+      option.textContent = label;
+      select.appendChild(option);
+    }
+  }
+
+  // === Gestion des records ===
+
+  function onRecordChange(record, mappings) {
+    // Mapping des colonnes Grist vers les IDs du formulaire HTML
+    var fieldMap = {
+      'Titre': 'titre',
+      'Description': 'description',
+      'URL': 'url',
+      'Mots_Cles': 'mots-cles',
+      'Statut_Publication': 'statut-publication',
+      'Niveau_Sensibilite': 'niveau-sensibilite',
+      'Domaine_Fonctionnel': 'domaine-fonctionnel',
+      'Bureau_Producteur': 'bureau-producteur',
+      'Systeme_Information': 'systeme-information',
+      'Contact': 'contact',
+      'Statut_Qualification': 'statut-qualification',
+    };
+
+    // Si mappings sont disponibles, les utiliser pour le nommage flexible
+    if (mappings) {
+      var mapped = grist.mapColumnNames(record, {
+        columns: grist.ready.columns,
+        mappings: mappings,
+      });
+      if (!mapped) {
+        console.warn('[Grist Widget] Colonnes non mappées. Veuillez mapper les colonnes du formulaire.');
+        return;
+      }
+      populateFormFromRecord(mapped, fieldMap);
+    } else if (record) {
+      populateFormFromRecord(record, fieldMap);
+    }
+
+    // Stocke l'ID du record courant pour la mise à jour
+    currentRecordId = record ? record.id : null;
+  }
+
+  function populateFormFromRecord(record, fieldMap) {
+    Object.keys(fieldMap).forEach(function (gristField) {
+      var formFieldId = fieldMap[gristField];
+      var el = document.getElementById(formFieldId);
+      if (!el) return;
+
+      var value = record[gristField];
+
+      // Mots-clés : ChoiceList Grist → texte séparé par virgules
+      if (formFieldId === 'mots-cles') {
+        if (Array.isArray(value)) {
+          el.value = value.join(', ');
+        } else if (typeof value === 'string') {
+          el.value = value;
+        }
+        return;
+      }
+
+      if (el.tagName === 'SELECT' && el.hasAttribute('multiple')) {
+        // ChoiceList : sélectionne les options correspondantes
+        Array.from(el.options).forEach(function (option) {
+          option.selected = Array.isArray(value) && value.indexOf(option.value) !== -1;
+        });
+      } else if (el.tagName === 'SELECT') {
+        // Choice simple
+        el.value = value || '';
+      } else {
+        // Text / URL / textarea
+        el.value = value || '';
+      }
+    });
+
+    // Recalcule le score et le badge
+    if (typeof window.calculateScore === 'function') {
+      window.calculateScore();
+    }
+    if (typeof window.calculateBadge === 'function') {
+      window.calculateBadge();
+    }
+  }
+
+  function onDataChange(records) {
+    // Les données ont changé — pas d'action spécifique nécessaire
+    // Le widget se met à jour via onRecordChange
+  }
+
+  // === Soumission des données ===
+
+  window.submitToGrist = function (formData, callback) {
+    if (!gristReady || !currentTable) {
+      var err = new Error('Widget Grist non initialisé. Vérifiez que le widget est intégré dans Grist.');
+      if (callback) callback(err, null);
+      return;
+    }
+
+    try {
+      // Mapping inverse : formulaire → colonnes Grist
+      var gristData = {
+        'Titre': formData.Titre,
+        'Description': formData.Description,
+        'URL': formData.URL,
+        'Mots_Cles': formData.Mots_Cles,
+        'Statut_Publication': formData.Statut_Publication,
+        'Niveau_Sensibilite': formData.Niveau_Sensibilite,
+        'Domaine_Fonctionnel': formData.Domaine_Fonctionnel,
+        'Bureau_Producteur': formData.Bureau_Producteur,
+        'Systeme_Information': formData.Systeme_Information,
+        'Contact': formData.Contact,
+        'Statut_Qualification': formData.Statut_Qualification,
+      };
+
+      if (currentRecordId) {
+        // Mode édition : mise à jour du record courant
+        currentTable.update({
+          id: currentRecordId,
+          fields: gristData,
+        }).then(function (result) {
+          console.log('[Grist Widget] Record mis à jour (id:', currentRecordId, ')');
+          if (callback) callback(null, result);
+        }).catch(function (err) {
+          console.error('[Grist Widget] Erreur mise à jour :', err);
+          if (callback) callback(err, null);
+        });
+      } else {
+        // Mode création : nouveau record
+        currentTable.create({
+          fields: gristData,
+        }).then(function (result) {
+          console.log('[Grist Widget] Nouveau record créé (id:', result.id, ')');
+          if (callback) callback(null, result);
+        }).catch(function (err) {
+          console.error('[Grist Widget] Erreur création :', err);
+          if (callback) callback(err, null);
+        });
+      }
+    } catch (err) {
+      console.error('[Grist Widget] Erreur de collecte des données :', err);
+      if (callback) callback(err, null);
+    }
+  };
+
+  // === Démarrage ===
+
+  // Attendre que le DOM soit chargé
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initGristWidget);
+  } else {
+    initGristWidget();
+  }
+
+})();

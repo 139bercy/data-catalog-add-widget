@@ -1,0 +1,102 @@
+/* Styles personnalisés au-delà du DSFR */
+
+/* Mode Express : sections 2-5 repliées par défaut */
+body.mode-express .fr-accordion__btn {
+  /* Les accordéons restent fermés par défaut en mode express */
+}
+
+body.mode-express .fr-collapse {
+  /* Force la fermeture des accordéons en mode express */
+  /* L'utilisateur peut les ouvrir manuellement */
+}
+
+/* Score de complétude — couleurs sémantiques */
+#score-completude {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+#score-completude.score-low {
+  color: #e53e3e; /* rouge */
+}
+
+#score-completude.score-medium {
+  color: #b7791f; /* jaune/orange */
+}
+
+#score-completude.score-high {
+  color: #16a34a; /* vert */
+}
+
+/* Badge de maturité */
+#badge-maturite {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0;
+}
+
+#badge-maturite.badge-brouillon {
+  color: #e53e3e;
+}
+
+#badge-maturite.badge-a-verifier {
+  color: #b7791f;
+}
+
+#badge-maturite.badge-qualifie {
+  color: #2b6cb0;
+}
+
+#badge-maturite.badge-certifie {
+  color: #16a34a;
+}
+
+/* Cartes de qualification */
+#score-card, #badge-card {
+  border: 1px solid var(--border-default-grey);
+  border-radius: var(--border-radius);
+}
+
+/* Bouton toggle mode */
+#toggle-mode {
+  transition: background-color 0.2s ease;
+}
+
+#toggle-mode[aria-pressed="true"] {
+  background-color: var(--bg-action-low-blue);
+  color: var(--text-default-blue);
+  border-color: var(--border-default-blue);
+}
+
+/* Feedback de soumission */
+#form-messages .fr-alert {
+  margin-bottom: 1rem;
+}
+
+/* Responsive : empiler les colonnes sur mobile */
+@media (max-width: 768px) {
+  .fr-col-md-6 {
+    flex: 0 0 100%;
+    max-width: 100%;
+  }
+}
+
+/* Accessibilité : focus visible */
+.fr-input:focus,
+.fr-select:focus,
+.fr-btn:focus {
+  outline: 3px solid var(--border-active-blue);
+  outline-offset: 0;
+}
+
+/* Loading state du bouton */
+#btn-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+#btn-submit .fr-spinner {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
