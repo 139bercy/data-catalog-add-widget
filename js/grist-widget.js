@@ -281,17 +281,21 @@
         if (!Array.isArray(arr)) return [];
         return arr.map(function (v) { var n = Number(v); return isNaN(n) ? null : n; }).filter(function (v) { return v !== null; });
       }
+      function toGristList(arr) {
+        if (!Array.isArray(arr) || arr.length === 0) return null;
+        return ['L'].concat(arr);
+      }
 
       var gristData = {
         'Titre': formData.Titre,
         'Description': formData.Description,
         'URL': formData.URL,
-        'Mots_Cles': formData.Mots_Cles,
+        'Mots_Cles': toGristList(formData.Mots_Cles),
         'Statut_Publication': formData.Statut_Publication,
-        'Niveau_Sensibilite': formData.Niveau_Sensibilite,
+        'Niveau_Sensibilite': toGristList(formData.Niveau_Sensibilite),
         'Domaine_Fonctionnel': toRef(formData.Domaine_Fonctionnel),
         'Bureau_Producteur': toRef(formData.Bureau_Producteur),
-        'Systeme_d_Information': toRefList(formData.Systeme_d_Information),
+        'Systeme_d_Information': toGristList(toRefList(formData.Systeme_d_Information)),
         'Contact': toRef(formData.Contact),
         'Statut_Qualification': formData.Statut_Qualification,
       };
