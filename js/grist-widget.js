@@ -204,13 +204,16 @@
       }
 
       if (el.tagName === 'SELECT' && el.hasAttribute('multiple')) {
-        // ChoiceList : sélectionne les options correspondantes
-        Array.from(el.options).forEach(function (option) {
-          option.selected = Array.isArray(value) && value.indexOf(option.value) !== -1;
-        });
+        // ChoiceList / ReferenceList : sélectionne les options correspondantes
+        // Les IDs Grist sont des numbers, option.value est un string → coercion
+        if (Array.isArray(value)) {
+          Array.from(el.options).forEach(function (option) {
+            option.selected = value.indexOf(Number(option.value)) !== -1;
+          });
+        }
       } else if (el.tagName === 'SELECT') {
-        // Choice simple
-        el.value = value || '';
+        // Choice / Reference simple → coerce en string pour match option.value
+        el.value = (value !== null && value !== undefined) ? String(value) : '';
       } else {
         // Text / URL / textarea
         el.value = value || '';
@@ -242,6 +245,17 @@
 
     try {
       // Mapping inverse : formulaire → colonnes Grist
+      // Les select values sont des strings, mais Grist attend des numbers pour References
+      function toRef(v) {
+        if (!v || v === '') return null;
+        var n = Number(v);
+        return isNaN(n) ? null : n;
+      }
+      function toRefList(arr) {
+        if (!Array.isArray(arr)) return [];
+        return arr.map(function (v) { var n = Number(v); return isNaN(n) ? null : n; }).filter(function (v) { return v !== null; });
+      }
+
       var gristData = {
         'Titre': formData.Titre,
         'Description': formData.Description,
@@ -249,10 +263,10 @@
         'Mots_Cles': formData.Mots_Cles,
         'Statut_Publication': formData.Statut_Publication,
         'Niveau_Sensibilite': formData.Niveau_Sensibilite,
-        'Domaine_Fonctionnel': formData.Domaine_Fonctionnel,
-        'Bureau_Producteur': formData.Bureau_Producteur,
-        'Systeme_Information': formData.Systeme_Information,
-        'Contact': formData.Contact,
+        'Domaine_Fonctionnel': toRef(formData.Domaine_Fonctionnel),
+        'Bureau_Producteur': toRef(formData.Bureau_Producteur),
+        'Systeme_Information': toRefList(formData.Systeme_Information),
+        'Contact': toRef(formData.Contact),
         'Statut_Qualification': formData.Statut_Qualification,
       };
 
