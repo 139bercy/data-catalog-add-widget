@@ -243,11 +243,13 @@
     // Envoi au widget Grist
     if (typeof window.submitToGrist === 'function') {
       submitBtn.disabled = true;
+      submitBtn.classList.remove('fr-icon-save-line');
       submitBtn.innerHTML = '<span class="fr-spinner" aria-hidden="true"></span> Enregistrement...';
 
       window.submitToGrist(data, function (err, result) {
         submitBtn.disabled = false;
-        submitBtn.innerHTML = '<i class="fr-icon-save-line fr-icon--left" aria-hidden="true"></i> Enregistrer';
+        submitBtn.classList.add('fr-icon-save-line');
+        submitBtn.innerHTML = 'Enregistrer';
 
         if (err) {
           showMessages([{ type: 'fr-alert--error', text: 'Erreur lors de l\'enregistrement : ' + err.message }]);

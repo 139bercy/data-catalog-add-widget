@@ -8,7 +8,7 @@
 
   <!-- DSFR -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/dsfr.min.css">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/icon/dsfr-icons.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/utility/icons/icons.min.css">
   <link rel="stylesheet" href="css/custom.css">
 
   <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/dsfr.min.js"></script>
@@ -42,21 +42,25 @@
   <header class="fr-header" role="banner">
     <div class="fr-container fr-container--fluid">
       <div class="fr-header__body">
-        <div class="fr-grid-row fr-grid-row--middle">
-          <div class="fr-col-12 fr-col-md-3 fr-header__logo">
-            <a class="fr-header__branding" href="#">
-              <div class="fr-header__logo">
-                <img class="fr-responsive-img" src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/logo/france.png" alt="République Française" width="48" height="48">
-              </div>
-              <p class="fr-header__operator">Ministère de l'Économie et des Finances</p>
-            </a>
+        <div class="fr-header__body-row">
+          <div class="fr-header__brand">
+            <div class="fr-header__brand-top">
+              <a class="fr-header__branding" href="#" title="Accueil - Ministère de l'Économie et des Finances">
+                <div class="fr-header__logo">
+                  <p class="fr-logo">
+                    République
+                    <br>Française
+                  </p>
+                </div>
+                <p class="fr-header__operator">Ministère de l'Économie<br>et des Finances</p>
+              </a>
+            </div>
           </div>
-          <div class="fr-col-12 fr-col-md-9 fr-header__top">
-            <div class="fr-header__navbar">
-              <div class="fr-btns-group fr-btns-group--inline fr-btns-group--icon-text fr-btns-group--right">
-                <button class="fr-btn" id="toggle-mode" type="button" aria-pressed="false">
-                  <i class="fr-icon-rocket-2-line fr-icon--lg" aria-hidden="true"></i>
-                  Mode <span id="mode-label">Avancé</span>
+          <div class="fr-header__tools">
+            <div class="fr-header__tools-links">
+              <div class="fr-btns-group fr-btns-group--inline fr-btns-group--right">
+                <button class="fr-btn fr-icon-equalizer-line fr-btn--icon-left" id="toggle-mode" type="button" aria-pressed="false">
+                  Mode&nbsp;<span id="mode-label">Avancé</span>
                 </button>
               </div>
             </div>
@@ -72,7 +76,7 @@
       <div class="fr-grid-row">
         <div class="fr-col-12 fr-col-lg-10 fr-col-lg-offset-1">
 
-          <h1 class="fr-h1">Catalogage des données des ministères économiques et financiers</h1>
+          <h1 class="fr-h1">Catalogage des données</h1>
           <p class="fr-text--lg fr-mb-4w">
             Remplissez les informations pour saisir un jeu de données.</br>
             Les champs marqués <span class="fr-text--bold" aria-hidden="true">*</span> sont obligatoires.
@@ -303,8 +307,7 @@
 
             <!-- Bouton de soumission -->
             <div class="fr-my-4w fr-text--center">
-              <button type="submit" class="fr-btn fr-btn--lg" id="btn-submit">
-                <i class="fr-icon-save-line fr-icon--left" aria-hidden="true"></i>
+              <button type="submit" class="fr-btn fr-btn--lg fr-icon-save-line fr-btn--icon-left" id="btn-submit">
                 Enregistrer
               </button>
             </div>
@@ -320,19 +323,18 @@
   <footer class="fr-footer" role="contentinfo">
     <div class="fr-container">
       <div class="fr-footer__body">
-        <div class="fr-grid-row fr-grid-row--start">
-          <div class="fr-col-12 fr-col-md-3">
-            <p class="fr-footer__brand">
-              <a href="#">
-                <img class="fr-responsive-img" src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/logo/france.png" alt="République Française" width="48" height="48">
-                <p class="fr-footer__operator-text">Ministère de l'Économie et des Finances</p>
-              </a>
+        <div class="fr-footer__brand">
+          <a href="#" title="Accueil - Ministère de l'Économie et des Finances">
+            <p class="fr-logo">
+              République
+              <br>Française
             </p>
-          </div>
+          </a>
+          <p class="fr-footer__operator-text">Ministère de l'Économie<br>et des Finances</p>
         </div>
       </div>
       <div class="fr-footer__content">
-        <p class="fr-footer__content-desc">Catalogue de données ministérielles — Standard DCAT-AP</p>
+        <p class="fr-footer__content-desc"><a href="mailto:amd@finances.gouv.fr" target="_blank">Secrétariat Général - Service du Numérique - Bercy Hub</a></p>
       </div>
     </div>
   </footer>
