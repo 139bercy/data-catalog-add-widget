@@ -253,6 +253,7 @@
           showMessages([{ type: 'fr-alert--error', text: 'Erreur lors de l\'enregistrement : ' + err.message }]);
         } else {
           showMessages([{ type: 'fr-alert--success', text: 'Enregistrement réussi !' }]);
+          form.reset();
           calculateScore();
           calculateBadge();
         }
@@ -261,6 +262,9 @@
       // Mode hors Grist : log pour debug
       console.log('Données du formulaire :', data);
       showMessages([{ type: 'fr-alert--success', text: 'Formulaire prêt. Intégrez ce widget dans Grist pour l\'enregistrement.' }]);
+      form.reset();
+      calculateScore();
+      calculateBadge();
     }
   });
 
@@ -292,7 +296,7 @@
       Niveau_Sensibilite: getSelectValues('niveau-sensibilite'),
       Domaine_Fonctionnel: getSelectValues('domaine-fonctionnel'),
       Bureau_Producteur: getSelectValues('bureau-producteur'),
-      Systeme_Information: getSelectValues('systeme-information'),
+      Systeme_d_Information: getSelectValues('systeme-information'),
       Contact: getSelectValues('contact'),
       Statut_Qualification: getSelectValues('statut-qualification'),
     };
