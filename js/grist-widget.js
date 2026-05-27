@@ -128,6 +128,75 @@
     return ids;
   }
 
+
+  /**
+   * Sélectionne une option dans un élément <select> par sa valeur (ID) ou par son texte (affichage de référence).
+   * Gère de manière transparente les deux types de retours de Grist.
+   */
+  function selectOptionByValueOrText(selectEl, valueOrText) {
+    if (!selectEl) return;
+    if (valueOrText === null || valueOrText === undefined || valueOrText === '') {
+      selectEl.value = '';
+      return;
+    }
+
+    var strVal = String(valueOrText).trim();
+    
+    // 1. Essayer de sélectionner par la valeur de l'option (ID numérique)
+    selectEl.value = strVal;
+    if (selectEl.value === strVal) {
+      return; // Match réussi par ID !
+    }
+
+    // 2. Sinon, essayer de faire correspondre avec le texte de l'option (valeur d'affichage de la référence)
+    var lowercaseVal = strVal.toLowerCase();
+    for (var i = 0; i < selectEl.options.length; i++) {
+      var option = selectEl.options[i];
+      if (option.text.trim().toLowerCase() === lowercaseVal) {
+        selectEl.value = option.value;
+        return; // Match réussi par texte !
+      }
+    }
+    
+    // 3. Repli : vide si aucun match
+    selectEl.value = '';
+  }
+
+  /**
+   * Sélectionne des options dans un élément <select multiple> par leurs valeurs (IDs) ou par leurs textes.
+   */
+  function selectMultipleOptionsByValuesOrTexts(selectEl, valuesOrTexts) {
+    if (!selectEl) return;
+    
+    var cleanList = [];
+    if (Array.isArray(valuesOrTexts)) {
+      cleanList = valuesOrTexts[0] === 'L' ? valuesOrTexts.slice(1) : valuesOrTexts;
+    } else if (valuesOrTexts !== null && valuesOrTexts !== undefined && valuesOrTexts !== '') {
+      cleanList = [valuesOrTexts];
+    }
+
+    // Convertir tous les éléments en chaînes nettoyées (ID ou texte d'affichage)
+    var items = cleanList.map(function (item) {
+      var refId = parseGristReferenceId(item);
+      return refId !== null ? String(refId) : String(item).trim();
+    });
+
+    Array.from(selectEl.options).forEach(function (option) {
+      var optVal = option.value;
+      var optText = option.text.trim().toLowerCase();
+      
+      var isSelected = false;
+      for (var i = 0; i < items.length; i++) {
+        var item = items[i];
+        if (item === optVal || item.toLowerCase() === optText) {
+          isSelected = true;
+          break;
+        }
+      }
+      option.selected = isSelected;
+    });
+  }
+
   // === Initialisation du widget Grist ===
 
   function initGristWidget() {
@@ -263,10 +332,25 @@
       if (recordToLoad) {
         var el = document.getElementById('bureau-producteur');
         if (el) {
-          var selectedId = parseGristReferenceId(recordToLoad.Bureau_Producteur);
-          var found = allBureaux.find(function (b) { return b.id === selectedId; });
-          el.value = found ? found.chemin : '';
-          updateDeducedBalf(selectedId);
+          var value = recordToLoad.Bureau_Producteur;
+          var selectedId = parseGristReferenceId(value);
+          var found = null;
+          
+          if (selectedId !== null) {
+            found = allBureaux.find(function (b) { return b.id === selectedId; });
+          }
+          
+          if (found) {
+            el.value = found.chemin;
+            updateDeducedBalf(found.id);
+          } else if (value && typeof value === 'string') {
+            el.value = value;
+            var bureauId = getBureauIdFromChemin(value);
+            updateDeducedBalf(bureauId);
+          } else {
+            el.value = '';
+            updateDeducedBalf(null);
+          }
         }
       }
     }).catch(function (err) {
@@ -540,12 +624,26 @@
         console.log('[Grist Widget] Champ', gristField, '-> Direct : ', JSON.stringify(value));
       }
 
-      // Bureau producteur : cherche le chemin correspondant à l'ID reçu de Grist
+      // Bureau producteur : cherche le chemin correspondant à la valeur reçue de Grist (ID ou Texte d'affichage)
       if (formFieldId === 'bureau-producteur') {
         var selectedId = parseGristReferenceId(value);
-        var found = allBureaux.find(function (b) { return b.id === selectedId; });
-        el.value = found ? found.chemin : '';
-        updateDeducedBalf(selectedId);
+        var found = null;
+        
+        if (selectedId !== null) {
+          found = allBureaux.find(function (b) { return b.id === selectedId; });
+        }
+        
+        if (found) {
+          el.value = found.chemin;
+          updateDeducedBalf(found.id);
+        } else if (value && typeof value === 'string') {
+          el.value = value;
+          var bureauId = getBureauIdFromChemin(value);
+          updateDeducedBalf(bureauId);
+        } else {
+          el.value = '';
+          updateDeducedBalf(null);
+        }
         return;
       }
 
@@ -561,36 +659,21 @@
       }
 
       if (el.tagName === 'SELECT' && el.hasAttribute('multiple')) {
-        // ChoiceList / ReferenceList : sélectionne les options correspondantes
-        var cleanList = [];
-        var refListFields = ['couverture-geo', 'systeme-information', 'format-donnees'];
-        if (refListFields.indexOf(formFieldId) !== -1) {
-          cleanList = parseGristReferenceListIds(value);
-        } else {
-          // ChoiceList standard
-          if (Array.isArray(value)) {
-            cleanList = value[0] === 'L' ? value.slice(1) : value;
-          } else if (value !== null && value !== undefined) {
-            cleanList = [value];
-          }
-        }
-
-        Array.from(el.options).forEach(function (option) {
-          var optVal = option.value;
-          option.selected = cleanList.indexOf(Number(optVal)) !== -1 || cleanList.indexOf(optVal) !== -1;
-        });
+        // ChoiceList / ReferenceList / listes de valeurs : sélectionne par ID ou par Texte
+        selectMultipleOptionsByValuesOrTexts(el, value);
       } else if (el.type === 'checkbox') {
-        el.checked = Boolean(value);
+        // Données ouvertes / booleans : conversion robuste pour gérer strings ("true", "false", "Oui") ou booleans
+        if (typeof value === 'string') {
+          var normVal = value.trim().toLowerCase();
+          el.checked = (normVal === 'true' || normVal === '1' || normVal === 'oui' || normVal === 'yes');
+        } else {
+          el.checked = Boolean(value);
+        }
       } else if (el.type === 'date') {
         el.value = value ? String(value).substring(0, 10) : '';
       } else if (el.tagName === 'SELECT') {
-        // Choice / Reference simple
-        var cleanValue = value;
-        var refFields = ['domaine-fonctionnel', 'organisation', 'service', 'frequence-maj', 'contact-service', 'contact', 'licence'];
-        if (refFields.indexOf(formFieldId) !== -1) {
-          cleanValue = parseGristReferenceId(value);
-        }
-        el.value = (cleanValue !== null && cleanValue !== undefined) ? String(cleanValue) : '';
+        // Choice / Reference simple : sélectionne par ID (valeur) ou par Texte d'affichage
+        selectOptionByValueOrText(el, value);
       } else {
         // Text / URL / textarea / numeric
         el.value = (value !== null && value !== undefined) ? value : '';
