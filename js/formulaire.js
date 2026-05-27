@@ -28,7 +28,6 @@
     'systeme-information',
     'frequence-maj',
     'contact',
-    'contact-service',
     'url-telechargement',
     'format-donnees',
     'licence'
@@ -323,7 +322,7 @@
       Date_MaJ: document.getElementById('date-maj').value,
 
       // Niveau 4 - Contact
-      Contact_Service: getSelectValues('contact-service'),
+      Contact_Service: '',
       Contact: getSelectValues('contact'),
 
       // Niveau 5 - Technique & Distribution

@@ -126,11 +126,13 @@
       allBureaux = [];
       var noms = data.Nom || data.Nom_Complet || data.Nom_Principal;
       var chemins = data.Chemin || noms;
+      var balfs = data.BALF || [];
       for (var i = 0; i < data.id.length; i++) {
         allBureaux.push({
           id: data.id[i],
           nom: noms[i] || '',
-          chemin: chemins[i] || noms[i] || ''
+          chemin: chemins[i] || noms[i] || '',
+          balf: balfs[i] || ''
         });
       }
       allBureaux.sort(function (a, b) {
@@ -191,13 +193,6 @@
       console.warn('[Grist Widget] Impossible de charger Ref_Licence :', err.message);
     });
 
-    // 11. Ref_ContactPoint
-    fetchTable('Ref_ContactPoint').then(function (data) {
-      console.log('[Grist Widget] Ref_ContactPoint chargé :', data.id.length, 'points contact');
-      populateSelect('contact-service', data.id, data.Nom);
-    }).catch(function (err) {
-      console.warn('[Grist Widget] Impossible de charger Ref_ContactPoint :', err.message);
-    });
   }
 
   function renderBureauxOptions(filterText, selectedId) {
@@ -237,18 +232,44 @@
     }
   }
 
+  function updateDeducedBalf(selectedId) {
+    var displayEl = document.getElementById('contact-service-display');
+    if (!displayEl) return;
+
+    if (!selectedId) {
+      displayEl.value = '';
+      displayEl.placeholder = 'Sélectionnez un bureau producteur...';
+      return;
+    }
+
+    var bureau = allBureaux.find(function (b) { return b.id === Number(selectedId); });
+    if (bureau && bureau.balf) {
+      displayEl.value = bureau.balf;
+    } else {
+      displayEl.value = '';
+      displayEl.placeholder = 'Aucune boîte mail (BALF) renseignée pour ce bureau.';
+    }
+  }
+
   function setupBureauSearch() {
     var searchInput = document.getElementById('bureau-producteur-search');
+    var select = document.getElementById('bureau-producteur');
+    if (!select) return;
+
+    if (select.dataset.changeListenerAdded !== 'true') {
+      select.addEventListener('change', function () {
+        updateDeducedBalf(select.value);
+      });
+      select.dataset.changeListenerAdded = 'true';
+    }
+
     if (!searchInput) return;
 
     if (searchInput.dataset.listenerAdded === 'true') return;
 
     searchInput.addEventListener('input', function (e) {
       renderBureauxOptions(e.target.value);
-      var select = document.getElementById('bureau-producteur');
-      if (select) {
-        select.dispatchEvent(new Event('change', { bubbles: true }));
-      }
+      select.dispatchEvent(new Event('change', { bubbles: true }));
     });
 
     searchInput.dataset.listenerAdded = 'true';
@@ -380,6 +401,7 @@
         if (searchInput) searchInput.value = '';
         var selectedId = value ? Number(value) : null;
         renderBureauxOptions('', selectedId);
+        updateDeducedBalf(selectedId);
         return;
       }
 
