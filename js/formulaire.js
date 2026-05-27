@@ -277,6 +277,36 @@
     }
   });
 
+  // Bouton Nouveau
+  const btnNew = document.getElementById('btn-new');
+  if (btnNew) {
+    btnNew.addEventListener('click', function () {
+      clearMessages();
+      
+      // Délier le record Grist
+      if (typeof window.clearFormForCreate === 'function') {
+        window.clearFormForCreate();
+      }
+
+      // Réinitialiser les champs standards du formulaire
+      form.reset();
+
+      // Vider explicitement les sélections multiples
+      var multiSelects = form.querySelectorAll('select[multiple]');
+      multiSelects.forEach(function (select) {
+        Array.from(select.options).forEach(function (option) {
+          option.selected = false;
+        });
+      });
+
+      // Recalculer complétude et badge
+      calculateScore();
+      calculateBadge();
+
+      showMessages([{ type: 'fr-alert--info', text: 'Formulaire réinitialisé. Prêt pour la création d\'un nouveau dataset.' }]);
+    });
+  }
+
   // === Utilitaires ===
 
   function parseKeywords(text) {

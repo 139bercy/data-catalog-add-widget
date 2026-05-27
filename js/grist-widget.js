@@ -610,6 +610,26 @@
     }
   };
 
+  window.clearFormForCreate = function () {
+    currentRecordId = null;
+    lastLoadedRecord = null;
+
+    console.log('[Grist Widget] Formulaire délié de Grist (Prêt pour la création)');
+
+    // Vider explicitement les champs non-standards
+    var bureauInput = document.getElementById('bureau-producteur');
+    if (bureauInput) {
+      bureauInput.value = '';
+    }
+
+    var dropdown = document.getElementById('bureau-producteur-dropdown');
+    if (dropdown) {
+      dropdown.style.display = 'none';
+    }
+
+    updateDeducedBalf(null);
+  };
+
   // === Démarrage ===
 
   // Attendre que le DOM soit chargé
