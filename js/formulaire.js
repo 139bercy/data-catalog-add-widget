@@ -24,8 +24,6 @@
     'domaine-fonctionnel',
     'langue',
     'couverture-geo',
-    'organisation',
-    'service',
     'bureau-producteur',
     'systeme-information',
     'frequence-maj',
@@ -315,8 +313,8 @@
       Periode_de_couverture_Date_de_fin: document.getElementById('periode-fin').value,
 
       // Niveau 3 - Organisation
-      Organisation: getSelectValues('organisation'),
-      Service: getSelectValues('service'),
+      Organisation: '',
+      Service: '',
       Bureau_Producteur: getSelectValues('bureau-producteur'),
       Commanditaire: document.getElementById('commanditaire').value,
       Systeme_d_Information: getSelectValues('systeme-information'),

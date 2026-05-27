@@ -125,14 +125,16 @@
       console.log('[Grist Widget] Ref_Entite chargé :', data.id.length, 'entités');
       allBureaux = [];
       var noms = data.Nom || data.Nom_Complet || data.Nom_Principal;
+      var chemins = data.Chemin || noms;
       for (var i = 0; i < data.id.length; i++) {
         allBureaux.push({
           id: data.id[i],
-          nom: noms[i]
+          nom: noms[i] || '',
+          chemin: chemins[i] || noms[i] || ''
         });
       }
       allBureaux.sort(function (a, b) {
-        return a.nom.localeCompare(b.nom);
+        return a.chemin.localeCompare(b.chemin);
       });
       renderBureauxOptions('', null);
       setupBureauSearch();
@@ -156,21 +158,6 @@
       console.warn('[Grist Widget] Impossible de charger Ref_InformationSystem :', err.message);
     });
 
-    // 5. Ref_Organisation
-    fetchTable('Ref_Organisation').then(function (data) {
-      console.log('[Grist Widget] Ref_Organisation chargé :', data.id.length, 'organisations');
-      populateSelect('organisation', data.id, data.Nom);
-    }).catch(function (err) {
-      console.warn('[Grist Widget] Impossible de charger Ref_Organisation :', err.message);
-    });
-
-    // 6. Ref_Service
-    fetchTable('Ref_Service').then(function (data) {
-      console.log('[Grist Widget] Ref_Service chargé :', data.id.length, 'services');
-      populateSelect('service', data.id, data.Nom);
-    }).catch(function (err) {
-      console.warn('[Grist Widget] Impossible de charger Ref_Service :', err.message);
-    });
 
     // 7. Ref_Frequency
     fetchTable('Ref_Frequency').then(function (data) {
@@ -234,7 +221,7 @@
 
     for (var i = 0; i < allBureaux.length; i++) {
       var b = allBureaux[i];
-      if (filter && b.nom.toLowerCase().indexOf(filter) === -1) {
+      if (filter && b.chemin.toLowerCase().indexOf(filter) === -1) {
         if (b.id !== selectedId) {
           continue;
         }
@@ -242,7 +229,7 @@
 
       var opt = document.createElement('option');
       opt.value = String(b.id);
-      opt.textContent = b.nom;
+      opt.textContent = b.chemin;
       if (b.id === selectedId) {
         opt.selected = true;
       }
