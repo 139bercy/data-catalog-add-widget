@@ -118,6 +118,18 @@ body.mode-express .fr-collapse {
   text-decoration: none;
 }
 
+/* Supprime le surlignement sous les logos/blocs-marques */
+.fr-header__branding,
+.fr-header__branding:hover,
+.fr-header__brand a,
+.fr-header__brand a:hover,
+.fr-footer__brand a,
+.fr-footer__brand a:hover {
+  text-decoration: none !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+
 .fr-header__operator,
 .fr-footer__operator-text {
   margin: 0;

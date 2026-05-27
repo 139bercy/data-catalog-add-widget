@@ -17,6 +17,7 @@
   var currentTable = null;
   var currentRecordId = null;
   var refTablesLoaded = false;
+  var allBureaux = [];
 
   // === Initialisation du widget Grist ===
 
@@ -93,7 +94,19 @@
 
     fetchTable('Ref_Entite').then(function (data) {
       console.log('[Grist Widget] Ref_Entite chargé :', data.id.length, 'entités');
-      populateSelect('bureau-producteur', data.id, data.Nom || data.Nom_Complet || data.Nom_Principal);
+      allBureaux = [];
+      var noms = data.Nom || data.Nom_Complet || data.Nom_Principal;
+      for (var i = 0; i < data.id.length; i++) {
+        allBureaux.push({
+          id: data.id[i],
+          nom: noms[i]
+        });
+      }
+      allBureaux.sort(function (a, b) {
+        return a.nom.localeCompare(b.nom);
+      });
+      renderBureauxOptions('', null);
+      setupBureauSearch();
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Entite :', err.message);
     });
@@ -111,6 +124,60 @@
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_InformationSystem :', err.message);
     });
+  }
+
+  function renderBureauxOptions(filterText, selectedId) {
+    var select = document.getElementById('bureau-producteur');
+    if (!select) return;
+
+    if (selectedId === null || selectedId === undefined) {
+      selectedId = select.value ? Number(select.value) : null;
+    }
+
+    select.innerHTML = '';
+
+    var defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.disabled = true;
+    defaultOpt.selected = !selectedId;
+    defaultOpt.textContent = filterText ? 'Sélectionner parmi les résultats...' : 'Sélectionner un bureau';
+    select.appendChild(defaultOpt);
+
+    var filter = filterText.toLowerCase();
+
+    for (var i = 0; i < allBureaux.length; i++) {
+      var b = allBureaux[i];
+      if (filter && b.nom.toLowerCase().indexOf(filter) === -1) {
+        if (b.id !== selectedId) {
+          continue;
+        }
+      }
+
+      var opt = document.createElement('option');
+      opt.value = String(b.id);
+      opt.textContent = b.nom;
+      if (b.id === selectedId) {
+        opt.selected = true;
+      }
+      select.appendChild(opt);
+    }
+  }
+
+  function setupBureauSearch() {
+    var searchInput = document.getElementById('bureau-producteur-search');
+    if (!searchInput) return;
+
+    if (searchInput.dataset.listenerAdded === 'true') return;
+
+    searchInput.addEventListener('input', function (e) {
+      renderBureauxOptions(e.target.value);
+      var select = document.getElementById('bureau-producteur');
+      if (select) {
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+      }
+    });
+
+    searchInput.dataset.listenerAdded = 'true';
   }
 
   /**
@@ -205,6 +272,15 @@
       if (!el) return;
 
       var value = record[gristField];
+
+      // Bureau producteur : réinitialise la recherche et recharge toutes les options en ciblant la bonne sélection
+      if (formFieldId === 'bureau-producteur') {
+        var searchInput = document.getElementById('bureau-producteur-search');
+        if (searchInput) searchInput.value = '';
+        var selectedId = value ? Number(value) : null;
+        renderBureauxOptions('', selectedId);
+        return;
+      }
 
       // Mots-clés : ChoiceList Grist → texte séparé par virgules
       if (formFieldId === 'mots-cles') {
