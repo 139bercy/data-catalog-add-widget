@@ -139,7 +139,6 @@
       allBureaux.sort(function (a, b) {
         return a.chemin.localeCompare(b.chemin);
       });
-      renderBureauxOptions();
       setupBureauSearch();
 
       // Si un record a été chargé avant la fin du chargement des bureaux, ré-hydrate le champ
@@ -214,19 +213,51 @@
     return found ? found.id : null;
   }
 
-  function renderBureauxOptions() {
-    var datalist = document.getElementById('bureau-producteur-list');
-    if (!datalist) return;
+  function renderBureauxOptions(filterText) {
+    var dropdown = document.getElementById('bureau-producteur-dropdown');
+    if (!dropdown) return;
 
-    datalist.innerHTML = '';
-    console.log('[Grist Widget] Populating datalist with', allBureaux.length, 'options');
+    dropdown.innerHTML = '';
+    var filter = filterText ? String(filterText).toLowerCase() : '';
 
+    var matches = [];
     for (var i = 0; i < allBureaux.length; i++) {
       var b = allBureaux[i];
-      var opt = document.createElement('option');
-      opt.value = b.chemin;
-      datalist.appendChild(opt);
+      if (!filter || b.chemin.toLowerCase().indexOf(filter) !== -1) {
+        matches.push(b);
+      }
     }
+
+    if (matches.length === 0) {
+      dropdown.style.display = 'none';
+      return;
+    }
+
+    // Limiter l'affichage aux 30 meilleurs résultats pour la fluidité
+    var limit = Math.min(matches.length, 30);
+    for (var j = 0; j < limit; j++) {
+      (function (bureau) {
+        var optionDiv = document.createElement('div');
+        optionDiv.className = 'custom-autocomplete-option';
+        optionDiv.textContent = bureau.chemin;
+        
+        optionDiv.addEventListener('mousedown', function (e) {
+          // preventDefault évite le blur immédiat de l'input et garantit la prise en compte du clic
+          e.preventDefault();
+          var select = document.getElementById('bureau-producteur');
+          if (select) {
+            select.value = bureau.chemin;
+            select.dispatchEvent(new Event('input', { bubbles: true }));
+            select.dispatchEvent(new Event('change', { bubbles: true }));
+          }
+          dropdown.style.display = 'none';
+        });
+
+        dropdown.appendChild(optionDiv);
+      })(matches[j]);
+    }
+
+    dropdown.style.display = 'block';
   }
 
   function updateDeducedBalf(selectedId) {
@@ -250,15 +281,37 @@
 
   function setupBureauSearch() {
     var select = document.getElementById('bureau-producteur');
-    if (!select) return;
+    var dropdown = document.getElementById('bureau-producteur-dropdown');
+    if (!select || !dropdown) return;
 
     if (select.dataset.changeListenerAdded !== 'true') {
-      var handler = function () {
+      // Ouvre/rafraîchit le dropdown au focus ou au clic
+      select.addEventListener('focus', function () {
+        renderBureauxOptions(select.value);
+      });
+      select.addEventListener('click', function () {
+        renderBureauxOptions(select.value);
+      });
+
+      // Filtre au fur et à mesure de la frappe
+      select.addEventListener('input', function () {
+        renderBureauxOptions(select.value);
         var bureauId = getBureauIdFromChemin(select.value);
         updateDeducedBalf(bureauId);
-      };
-      select.addEventListener('input', handler);
-      select.addEventListener('change', handler);
+      });
+
+      select.addEventListener('change', function () {
+        var bureauId = getBureauIdFromChemin(select.value);
+        updateDeducedBalf(bureauId);
+      });
+
+      // Ferme le dropdown lorsque l'input perd le focus
+      select.addEventListener('blur', function () {
+        setTimeout(function () {
+          dropdown.style.display = 'none';
+        }, 150);
+      });
+
       select.dataset.changeListenerAdded = 'true';
     }
   }

@@ -108,8 +108,10 @@
                       <label class="fr-label" for="bureau-producteur" aria-required="true">
                         Bureau producteur <span class="fr-text--bold" aria-hidden="true">*</span>
                       </label>
-                      <input class="fr-input" type="text" id="bureau-producteur" name="bureau-producteur" list="bureau-producteur-list" placeholder="Saisissez ou sélectionnez un bureau..." required aria-required="true" autocomplete="on">
-                      <datalist id="bureau-producteur-list"></datalist>
+                      <div style="position: relative; width: 100%;">
+                        <input class="fr-input" type="text" id="bureau-producteur" name="bureau-producteur" placeholder="Saisissez pour filtrer les bureaux..." required aria-required="true" autocomplete="off">
+                        <div id="bureau-producteur-dropdown" class="custom-autocomplete-dropdown" style="display: none;"></div>
+                      </div>
                       <p class="fr-hint-text">Table Ref_Entite (recherche arborescente).</p>
                     </div>
                   </div>
