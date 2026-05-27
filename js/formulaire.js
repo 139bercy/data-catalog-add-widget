@@ -18,12 +18,22 @@
   const COMPLETENESS_FIELDS = [
     'titre',
     'description',
+    'mots-cles',
     'statut-publication',
     'niveau-sensibilite',
+    'domaine-fonctionnel',
+    'langue',
+    'couverture-geo',
+    'organisation',
+    'service',
     'bureau-producteur',
     'systeme-information',
+    'frequence-maj',
     'contact',
-    'mots-cles',
+    'contact-service',
+    'url-telechargement',
+    'format-donnees',
+    'licence'
   ];
 
   // === DOM Elements ===
@@ -297,9 +307,36 @@
       Statut_Publication: getSelectValues('statut-publication'),
       Niveau_Sensibilite: getSelectValues('niveau-sensibilite'),
       Domaine_Fonctionnel: getSelectValues('domaine-fonctionnel'),
+      
+      // Niveau 2 - Classification
+      Langue: getSelectValues('langue'),
+      Couverture_Geo: getSelectValues('couverture-geo'),
+      Periode_de_couverture_Date_de_debut: document.getElementById('periode-debut').value,
+      Periode_de_couverture_Date_de_fin: document.getElementById('periode-fin').value,
+
+      // Niveau 3 - Organisation
+      Organisation: getSelectValues('organisation'),
+      Service: getSelectValues('service'),
       Bureau_Producteur: getSelectValues('bureau-producteur'),
+      Commanditaire: document.getElementById('commanditaire').value,
       Systeme_d_Information: getSelectValues('systeme-information'),
+      Frequence_MaJ: getSelectValues('frequence-maj'),
+      Date_Publication: document.getElementById('date-publication').value,
+      Date_MaJ: document.getElementById('date-maj').value,
+
+      // Niveau 4 - Contact
+      Contact_Service: getSelectValues('contact-service'),
       Contact: getSelectValues('contact'),
+
+      // Niveau 5 - Technique & Distribution
+      URL_de_telechargement: document.getElementById('url-telechargement').value,
+      Format_Donnees: getSelectValues('format-donnees'),
+      Licence: getSelectValues('licence'),
+      Volumetrie_en_Mo_: document.getElementById('volumetrie').value,
+      Donnees_ouvertes: document.getElementById('donnees-ouvertes').checked,
+      URL_Open_Data: document.getElementById('url-open-data').value,
+
+      // Niveau 6 - Qualification
       Statut_Qualification: getSelectValues('statut-qualification'),
     };
   }

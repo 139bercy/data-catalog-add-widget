@@ -40,9 +40,36 @@
           { name: 'Statut_Publication', type: 'Choice', title: 'Statut de publication', optional: true },
           { name: 'Niveau_Sensibilite', type: 'ChoiceList', title: 'Niveau de sensibilité', optional: true },
           { name: 'Domaine_Fonctionnel', type: 'Ref', title: 'Domaine fonctionnel (Ref_Theme)', optional: true },
+          
+          // Niveau 2
+          { name: 'Langue', type: 'Choice', title: 'Langue', optional: true },
+          { name: 'Couverture_Geo', type: 'RefList', title: 'Couverture géographique (Ref_GeographicalCoverage)', optional: true },
+          { name: 'Periode_de_couverture_Date_de_debut', type: 'Date', title: 'Début de couverture', optional: true },
+          { name: 'Periode_de_couverture_Date_de_fin', type: 'Date', title: 'Fin de couverture', optional: true },
+
+          // Niveau 3
+          { name: 'Organisation', type: 'Ref', title: 'Organisation (Ref_Organisation)', optional: true },
+          { name: 'Service', type: 'Ref', title: 'Service (Ref_Service)', optional: true },
           { name: 'Bureau_Producteur', type: 'Ref', title: 'Bureau producteur (Ref_Entite)', optional: true },
-          { name: 'Systeme_d_Information', type: 'RefList', title: 'Système d\'information (Ref_InformationSystem)', optional: true },
+          { name: 'Commanditaire', type: 'Text', title: 'Commanditaire', optional: true },
+          { name: 'Systeme_d_Information', type: 'RefList', title: 'Systèmes d\'information (Ref_InformationSystem)', optional: true },
+          { name: 'Frequence_MaJ', type: 'Ref', title: 'Fréquence de mise à jour (Ref_Frequency)', optional: true },
+          { name: 'Date_Publication', type: 'Date', title: 'Date de publication', optional: true },
+          { name: 'Date_MaJ', type: 'Date', title: 'Date de dernière MaJ', optional: true },
+
+          // Niveau 4
+          { name: 'Contact_Service', type: 'Ref', title: 'Point de contact service (Ref_ContactPoint)', optional: true },
           { name: 'Contact', type: 'Ref', title: 'Contact principal (Ref_Utilisateur)', optional: true },
+
+          // Niveau 5
+          { name: 'URL_de_telechargement', type: 'Text', title: 'URL de téléchargement direct', optional: true },
+          { name: 'Format_Donnees', type: 'RefList', title: 'Format des données (Ref_Format)', optional: true },
+          { name: 'Licence', type: 'Ref', title: 'Licence juridique (Ref_Licence)', optional: true },
+          { name: 'Volumetrie_en_Mo_', type: 'Numeric', title: 'Volumétrie en Mo', optional: true },
+          { name: 'Donnees_ouvertes', type: 'Bool', title: 'Données ouvertes', optional: true },
+          { name: 'URL_Open_Data', type: 'Text', title: 'URL Open Data', optional: true },
+
+          // Niveau 6
           { name: 'Statut_Qualification', type: 'Choice', title: 'Statut de qualification', optional: true },
         ],
       });
@@ -85,6 +112,7 @@
       return Promise.reject(new Error("DocAPI fetchTable n'est pas disponible"));
     }
 
+    // 1. Ref_Utilisateur
     fetchTable('Ref_Utilisateur').then(function (data) {
       console.log('[Grist Widget] Ref_Utilisateur chargé :', data.id.length, 'utilisateurs');
       populateSelect('contact', data.id, data.Nom, data.Prenom);
@@ -92,6 +120,7 @@
       console.warn('[Grist Widget] Impossible de charger Ref_Utilisateur :', err.message);
     });
 
+    // 2. Ref_Entite
     fetchTable('Ref_Entite').then(function (data) {
       console.log('[Grist Widget] Ref_Entite chargé :', data.id.length, 'entités');
       allBureaux = [];
@@ -111,6 +140,7 @@
       console.warn('[Grist Widget] Impossible de charger Ref_Entite :', err.message);
     });
 
+    // 3. Ref_Theme
     fetchTable('Ref_Theme').then(function (data) {
       console.log('[Grist Widget] Ref_Theme chargé :', data.id.length, 'thèmes');
       populateSelect('domaine-fonctionnel', data.id, data.valeur);
@@ -118,11 +148,68 @@
       console.warn('[Grist Widget] Impossible de charger Ref_Theme :', err.message);
     });
 
+    // 4. Ref_InformationSystem
     fetchTable('Ref_InformationSystem').then(function (data) {
       console.log('[Grist Widget] Ref_InformationSystem chargé :', data.id.length, 'systèmes');
       populateMultiSelect('systeme-information', data.id, data.SI);
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_InformationSystem :', err.message);
+    });
+
+    // 5. Ref_Organisation
+    fetchTable('Ref_Organisation').then(function (data) {
+      console.log('[Grist Widget] Ref_Organisation chargé :', data.id.length, 'organisations');
+      populateSelect('organisation', data.id, data.Nom);
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_Organisation :', err.message);
+    });
+
+    // 6. Ref_Service
+    fetchTable('Ref_Service').then(function (data) {
+      console.log('[Grist Widget] Ref_Service chargé :', data.id.length, 'services');
+      populateSelect('service', data.id, data.Nom);
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_Service :', err.message);
+    });
+
+    // 7. Ref_Frequency
+    fetchTable('Ref_Frequency').then(function (data) {
+      console.log('[Grist Widget] Ref_Frequency chargé :', data.id.length, 'fréquences');
+      populateSelect('frequence-maj', data.id, data.valeur);
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_Frequency :', err.message);
+    });
+
+    // 8. Ref_GeographicalCoverage
+    fetchTable('Ref_GeographicalCoverage').then(function (data) {
+      console.log('[Grist Widget] Ref_GeographicalCoverage chargé :', data.id.length, 'zones géo');
+      populateMultiSelect('couverture-geo', data.id, data.valeur);
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_GeographicalCoverage :', err.message);
+    });
+
+    // 9. Ref_Format
+    fetchTable('Ref_Format').then(function (data) {
+      console.log('[Grist Widget] Ref_Format chargé :', data.id.length, 'formats');
+      populateMultiSelect('format-donnees', data.id, data.valeur);
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_Format :', err.message);
+    });
+
+    // 10. Ref_Licence
+    fetchTable('Ref_Licence').then(function (data) {
+      console.log('[Grist Widget] Ref_Licence chargé :', data.id.length, 'licences');
+      populateSelect('licence', data.id, data.valeur);
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_Licence :', err.message);
+    });
+
+    // 11. Ref_ContactPoint
+    fetchTable('Ref_ContactPoint').then(function (data) {
+      console.log('[Grist Widget] Ref_ContactPoint chargé :', data.id.length, 'points contact');
+      populateSelect('contact-service', data.id, data.Nom);
+    }).catch(function (err) {
+      console.warn('[Grist Widget] Impossible de charger Ref_ContactPoint :', err.message);
     });
   }
 
@@ -240,9 +327,36 @@
       'Statut_Publication': 'statut-publication',
       'Niveau_Sensibilite': 'niveau-sensibilite',
       'Domaine_Fonctionnel': 'domaine-fonctionnel',
+      
+      // Niveau 2
+      'Langue': 'langue',
+      'Couverture_Geo': 'couverture-geo',
+      'Periode_de_couverture_Date_de_debut': 'periode-debut',
+      'Periode_de_couverture_Date_de_fin': 'periode-fin',
+
+      // Niveau 3
+      'Organisation': 'organisation',
+      'Service': 'service',
       'Bureau_Producteur': 'bureau-producteur',
+      'Commanditaire': 'commanditaire',
       'Systeme_d_Information': 'systeme-information',
+      'Frequence_MaJ': 'frequence-maj',
+      'Date_Publication': 'date-publication',
+      'Date_MaJ': 'date-maj',
+
+      // Niveau 4
+      'Contact_Service': 'contact-service',
       'Contact': 'contact',
+
+      // Niveau 5
+      'URL_de_telechargement': 'url-telechargement',
+      'Format_Donnees': 'format-donnees',
+      'Licence': 'licence',
+      'Volumetrie_en_Mo_': 'volumetrie',
+      'Donnees_ouvertes': 'donnees-ouvertes',
+      'URL_Open_Data': 'url-open-data',
+
+      // Niveau 6
       'Statut_Qualification': 'statut-qualification',
     };
 
@@ -303,12 +417,16 @@
             option.selected = cleanList.indexOf(Number(optVal)) !== -1 || cleanList.indexOf(optVal) !== -1;
           });
         }
+      } else if (el.type === 'checkbox') {
+        el.checked = Boolean(value);
+      } else if (el.type === 'date') {
+        el.value = value ? String(value).substring(0, 10) : '';
       } else if (el.tagName === 'SELECT') {
         // Choice / Reference simple → coerce en string pour match option.value
         el.value = (value !== null && value !== undefined) ? String(value) : '';
       } else {
-        // Text / URL / textarea
-        el.value = value || '';
+        // Text / URL / textarea / numeric
+        el.value = (value !== null && value !== undefined) ? value : '';
       }
     });
 
@@ -361,6 +479,15 @@
         if (!Array.isArray(arr) || arr.length === 0) return null;
         return ['L'].concat(arr);
       }
+      function toDate(v) {
+        if (!v || v === '') return null;
+        return v; // Format YYYY-MM-DD natif
+      }
+      function toNumeric(v) {
+        if (!v || v === '') return null;
+        var n = Number(v);
+        return isNaN(n) ? null : n;
+      }
 
       var gristData = {
         'Titre': formData.Titre,
@@ -370,9 +497,36 @@
         'Statut_Publication': formData.Statut_Publication,
         'Niveau_Sensibilite': toGristList(formData.Niveau_Sensibilite),
         'Domaine_Fonctionnel': toRef(formData.Domaine_Fonctionnel),
+        
+        // Niveau 2
+        'Langue': formData.Langue,
+        'Couverture_Geo': toGristList(toRefList(formData.Couverture_Geo)),
+        'Periode_de_couverture_Date_de_debut': toDate(formData.Periode_de_couverture_Date_de_debut),
+        'Periode_de_couverture_Date_de_fin': toDate(formData.Periode_de_couverture_Date_de_fin),
+
+        // Niveau 3
+        'Organisation': toRef(formData.Organisation),
+        'Service': toRef(formData.Service),
         'Bureau_Producteur': toRef(formData.Bureau_Producteur),
+        'Commanditaire': formData.Commanditaire,
         'Systeme_d_Information': toGristList(toRefList(formData.Systeme_d_Information)),
+        'Frequence_MaJ': toRef(formData.Frequence_MaJ),
+        'Date_Publication': toDate(formData.Date_Publication),
+        'Date_MaJ': toDate(formData.Date_MaJ),
+
+        // Niveau 4
+        'Contact_Service': toRef(formData.Contact_Service),
         'Contact': toRef(formData.Contact),
+
+        // Niveau 5
+        'URL_de_telechargement': formData.URL_de_telechargement,
+        'Format_Donnees': toGristList(toRefList(formData.Format_Donnees)),
+        'Licence': toRef(formData.Licence),
+        'Volumetrie_en_Mo_': toNumeric(formData.Volumetrie_en_Mo_),
+        'Donnees_ouvertes': formData.Donnees_ouvertes,
+        'URL_Open_Data': formData.URL_Open_Data,
+
+        // Niveau 6
         'Statut_Qualification': formData.Statut_Qualification,
       };
 

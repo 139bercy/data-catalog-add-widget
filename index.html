@@ -168,18 +168,60 @@
                             <option value="diffusion-contrainee">Diffusion contrainte</option>
                             <option value="confidentiel">Confidentiel</option>
                           </select>
-                          <p class="fr-hint-text">Plusieurs sélection possibles.</p>
+                          <p class="fr-hint-text">Plusieurs sélections possibles.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="domaine-fonctionnel">Domaine fonctionnel</label>
+                          <select class="fr-select" id="domaine-fonctionnel" name="domaine-fonctionnel">
+                            <option value="" disabled selected>Chargement…</option>
+                          </select>
+                          <p class="fr-hint-text">Peut être sélectionné dans la table Ref_Theme.</p>
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="langue">Langue du dataset</label>
+                          <select class="fr-select" id="langue" name="langue">
+                            <option value="" disabled selected>Sélectionner une langue</option>
+                            <option value="FR">Français (FR)</option>
+                            <option value="EN">Anglais (EN)</option>
+                            <option value="DE">Allemand (DE)</option>
+                            <option value="ES">Espagnol (ES)</option>
+                            <option value="Autre">Autre</option>
+                          </select>
                         </div>
                       </div>
                     </div>
                   </div>
                   <div class="fr-fieldset__element">
                     <div class="fr-select-group">
-                      <label class="fr-label" for="domaine-fonctionnel">Domaine fonctionnel</label>
-                      <select class="fr-select" id="domaine-fonctionnel" name="domaine-fonctionnel">
-                        <option value="" disabled selected>Chargement…</option>
+                      <label class="fr-label" for="couverture-geo">Couverture géographique</label>
+                      <select class="fr-select" id="couverture-geo" name="couverture-geo" multiple>
+                        <option value="" disabled>Chargement…</option>
                       </select>
-                      <p class="fr-hint-text">Peut être sélectionné dans la table Ref_Theme.</p>
+                      <p class="fr-hint-text">Plusieurs sélections possibles. Provient de la table Ref_GeographicalCoverage.</p>
+                    </div>
+                  </div>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-input-group">
+                          <label class="fr-label" for="periode-debut">Période de couverture (Début)</label>
+                          <input class="fr-input" type="date" id="periode-debut" name="periode-debut">
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-input-group">
+                          <label class="fr-label" for="periode-fin">Période de couverture (Fin)</label>
+                          <input class="fr-input" type="date" id="periode-fin" name="periode-fin">
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </fieldset>
@@ -200,22 +242,83 @@
                     <h2 class="fr-h5">Organisation</h2>
                   </legend>
                   <div class="fr-fieldset__element">
-                    <div class="fr-select-group">
-                      <label class="fr-label" for="bureau-producteur">Bureau producteur</label>
-                      <input class="fr-input fr-mb-2v" type="text" id="bureau-producteur-search" placeholder="Filtrer les bureaux..." autocomplete="off">
-                      <select class="fr-select" id="bureau-producteur" name="bureau-producteur">
-                        <option value="" disabled selected>Chargement…</option>
-                      </select>
-                      <p class="fr-hint-text">Peut être sélectionné dans la table Ref_Entite.</p>
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="organisation">Organisation parente</label>
+                          <select class="fr-select" id="organisation" name="organisation">
+                            <option value="" disabled selected>Chargement…</option>
+                          </select>
+                          <p class="fr-hint-text">Table Ref_Organisation.</p>
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="service">Service producteur</label>
+                          <select class="fr-select" id="service" name="service">
+                            <option value="" disabled selected>Chargement…</option>
+                          </select>
+                          <p class="fr-hint-text">Table Ref_Service.</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                   <div class="fr-fieldset__element">
-                    <div class="fr-select-group">
-                      <label class="fr-label" for="systeme-information">Système d'information</label>
-                      <select class="fr-select" id="systeme-information" name="systeme-information" multiple>
-                        <option value="" disabled>Chargement…</option>
-                      </select>
-                      <p class="fr-hint-text">Plusieurs sélection possibles.</p>
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="bureau-producteur">Bureau producteur</label>
+                          <input class="fr-input fr-mb-2v" type="text" id="bureau-producteur-search" placeholder="Filtrer les bureaux..." autocomplete="off">
+                          <select class="fr-select" id="bureau-producteur" name="bureau-producteur">
+                            <option value="" disabled selected>Chargement…</option>
+                          </select>
+                          <p class="fr-hint-text">Table Ref_Entite.</p>
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-input-group">
+                          <label class="fr-label" for="commanditaire">Commanditaire / Propriétaire</label>
+                          <input class="fr-input" type="text" id="commanditaire" name="commanditaire" placeholder="ex: Sous-direction du budget">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="systeme-information">Système d'information</label>
+                          <select class="fr-select" id="systeme-information" name="systeme-information" multiple>
+                            <option value="" disabled>Chargement…</option>
+                          </select>
+                          <p class="fr-hint-text">Plusieurs sélections possibles. Table Ref_InformationSystem.</p>
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="frequence-maj">Fréquence de mise à jour</label>
+                          <select class="fr-select" id="frequence-maj" name="frequence-maj">
+                            <option value="" disabled selected>Chargement…</option>
+                          </select>
+                          <p class="fr-hint-text">Table Ref_Frequency.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-input-group">
+                          <label class="fr-label" for="date-publication">Date de publication</label>
+                          <input class="fr-input" type="date" id="date-publication" name="date-publication">
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-input-group">
+                          <label class="fr-label" for="date-maj">Dernière mise à jour</label>
+                          <input class="fr-input" type="date" id="date-maj" name="date-maj">
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </fieldset>
@@ -236,33 +339,118 @@
                     <h2 class="fr-h5">Contact</h2>
                   </legend>
                   <div class="fr-fieldset__element">
-                    <div class="fr-select-group">
-                      <label class="fr-label" for="contact">Contact principal</label>
-                      <select class="fr-select" id="contact" name="contact">
-                        <option value="" disabled selected>Sélectionner un contact</option>
-                        <option value="user-1">Paul — SNUM</option>
-                        <option value="user-2">Marie — DGFIP</option>
-                        <option value="user-3">Jean — SG</option>
-                        <option value="user-4">Sophie — DGE</option>
-                        <option value="user-5">Luc — DAJ</option>
-                      </select>
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="contact">Contact principal</label>
+                          <select class="fr-select" id="contact" name="contact">
+                            <option value="" disabled selected>Sélectionner un contact</option>
+                            <option value="user-1">Paul — SNUM</option>
+                            <option value="user-2">Marie — DGFIP</option>
+                            <option value="user-3">Jean — SG</option>
+                            <option value="user-4">Sophie — DGE</option>
+                            <option value="user-5">Luc — DAJ</option>
+                          </select>
+                          <p class="fr-hint-text">Table Ref_Utilisateur.</p>
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="contact-service">Point de contact service (BALF)</label>
+                          <select class="fr-select" id="contact-service" name="contact-service">
+                            <option value="" disabled selected>Chargement…</option>
+                          </select>
+                          <p class="fr-hint-text">Table Ref_ContactPoint.</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </fieldset>
               </div>
             </section>
 
-            <!-- Section 5 — Qualification (Niveau 5, lecture seule, auto-calculé) -->
+            <!-- Section 5 — Technique & Distribution (Niveau 5, accordéon) -->
             <section class="fr-accordion" id="section5-accordion">
               <h3 class="fr-accordion__title">
                 <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="section5-content">
-                  <span class="fr-text--bold">Niveau 5 - Qualification</span>
-                  Auto-évaluation de la maturité des métadonnées (calculé automatiquement)
+                  <span class="fr-text--bold">Niveau 5 - Technique & Distribution</span>
+                  Accès physique et détails techniques des données
                 </button>
               </h3>
               <div class="fr-collapse" id="section5-content">
                 <fieldset class="fr-fieldset" aria-labelledby="section5-legend">
                   <legend class="fr-fieldset__legend" id="section5-legend">
+                    <h2 class="fr-h5">Technique & Distribution</h2>
+                  </legend>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-input-group">
+                          <label class="fr-label" for="url-telechargement">URL de téléchargement direct</label>
+                          <input class="fr-input" type="url" id="url-telechargement" name="url-telechargement" placeholder="ex: https://example.com/data.csv">
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="format-donnees">Format des données</label>
+                          <select class="fr-select" id="format-donnees" name="format-donnees" multiple>
+                            <option value="" disabled>Chargement…</option>
+                          </select>
+                          <p class="fr-hint-text">Plusieurs sélections possibles. Table Ref_Format.</p>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="licence">Licence juridique</label>
+                          <select class="fr-select" id="licence" name="licence">
+                            <option value="" disabled selected>Chargement…</option>
+                          </select>
+                          <p class="fr-hint-text">Table Ref_Licence.</p>
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-input-group">
+                          <label class="fr-label" for="volumetrie">Volumétrie (Mo)</label>
+                          <input class="fr-input" type="number" step="0.1" id="volumetrie" name="volumetrie" placeholder="ex: 12.5">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="fr-fieldset__element">
+                    <div class="fr-grid-row fr-grid-row--gutters">
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-checkbox-group">
+                          <input type="checkbox" id="donnees-ouvertes" name="donnees-ouvertes">
+                          <label class="fr-label" for="donnees-ouvertes">Données ouvertes (Open Data)</label>
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-input-group">
+                          <label class="fr-label" for="url-open-data">URL Open Data</label>
+                          <input class="fr-input" type="url" id="url-open-data" name="url-open-data" placeholder="ex: https://data.gouv.fr/... ">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </fieldset>
+              </div>
+            </section>
+
+            <!-- Section 6 — Qualification (Niveau 6, accordéon) -->
+            <section class="fr-accordion" id="section6-accordion">
+              <h3 class="fr-accordion__title">
+                <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="section6-content">
+                  <span class="fr-text--bold">Niveau 6 - Qualification</span>
+                  Auto-évaluation de la maturité des métadonnées (calculé automatiquement)
+                </button>
+              </h3>
+              <div class="fr-collapse" id="section6-content">
+                <fieldset class="fr-fieldset" aria-labelledby="section6-legend">
+                  <legend class="fr-fieldset__legend" id="section6-legend">
                     <h2 class="fr-h5">Qualification</h2>
                     <p class="fr-hint-text">Ces champs sont calculés automatiquement en fonction des métadonnées saisies.</p>
                   </legend>
