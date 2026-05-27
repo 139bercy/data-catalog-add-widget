@@ -19,6 +19,7 @@
   var refTablesLoaded = false;
   var allBureaux = [];
   var lastLoadedRecord = null;
+  var lastLoadedRawRecord = null;
 
   // Mapping des colonnes Grist vers les IDs du formulaire HTML
   var FIELD_MAP = {
@@ -73,7 +74,7 @@
    * - null ou undefined
    */
   function parseGristReferenceId(value) {
-    if (value === null || value === undefined) return null;
+    if (value === null || value === undefined || value === 0) return null;
     
     // Cas 1 : Nombre simple ou chaîne numérique
     if (typeof value === 'number') return value;
@@ -220,13 +221,18 @@
       return Promise.reject(new Error("DocAPI fetchTable n'est pas disponible"));
     }
 
+    function rehydrateIfRecordLoaded() {
+      var recordToLoad = lastLoadedRecord || lastLoadedRawRecord;
+      if (recordToLoad) {
+        populateFormFromRecord(recordToLoad);
+      }
+    }
+
     // 1. Ref_Utilisateur
     fetchTable('Ref_Utilisateur').then(function (data) {
       console.log('[Grist Widget] Ref_Utilisateur chargé :', data.id.length, 'utilisateurs');
       populateSelect('contact', data.id, data.Nom, data.Prenom);
-      if (lastLoadedRecord) {
-        populateFormFromRecord(lastLoadedRecord);
-      }
+      rehydrateIfRecordLoaded();
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Utilisateur :', err.message);
     });
@@ -252,10 +258,11 @@
       setupBureauSearch();
 
       // Si un record a été chargé avant la fin du chargement des bureaux, ré-hydrate le champ
-      if (lastLoadedRecord) {
+      var recordToLoad = lastLoadedRecord || lastLoadedRawRecord;
+      if (recordToLoad) {
         var el = document.getElementById('bureau-producteur');
         if (el) {
-          var selectedId = parseGristReferenceId(lastLoadedRecord.Bureau_Producteur);
+          var selectedId = parseGristReferenceId(recordToLoad.Bureau_Producteur);
           var found = allBureaux.find(function (b) { return b.id === selectedId; });
           el.value = found ? found.chemin : '';
           updateDeducedBalf(selectedId);
@@ -269,9 +276,7 @@
     fetchTable('Ref_Theme').then(function (data) {
       console.log('[Grist Widget] Ref_Theme chargé :', data.id.length, 'thèmes');
       populateSelect('domaine-fonctionnel', data.id, data.valeur);
-      if (lastLoadedRecord) {
-        populateFormFromRecord(lastLoadedRecord);
-      }
+      rehydrateIfRecordLoaded();
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Theme :', err.message);
     });
@@ -280,9 +285,7 @@
     fetchTable('Ref_InformationSystem').then(function (data) {
       console.log('[Grist Widget] Ref_InformationSystem chargé :', data.id.length, 'systèmes');
       populateMultiSelect('systeme-information', data.id, data.SI);
-      if (lastLoadedRecord) {
-        populateFormFromRecord(lastLoadedRecord);
-      }
+      rehydrateIfRecordLoaded();
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_InformationSystem :', err.message);
     });
@@ -292,9 +295,7 @@
     fetchTable('Ref_Frequency').then(function (data) {
       console.log('[Grist Widget] Ref_Frequency chargé :', data.id.length, 'fréquences');
       populateSelect('frequence-maj', data.id, data.valeur);
-      if (lastLoadedRecord) {
-        populateFormFromRecord(lastLoadedRecord);
-      }
+      rehydrateIfRecordLoaded();
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Frequency :', err.message);
     });
@@ -303,9 +304,7 @@
     fetchTable('Ref_GeographicalCoverage').then(function (data) {
       console.log('[Grist Widget] Ref_GeographicalCoverage chargé :', data.id.length, 'zones géo');
       populateMultiSelect('couverture-geo', data.id, data.valeur);
-      if (lastLoadedRecord) {
-        populateFormFromRecord(lastLoadedRecord);
-      }
+      rehydrateIfRecordLoaded();
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_GeographicalCoverage :', err.message);
     });
@@ -314,9 +313,7 @@
     fetchTable('Ref_Format').then(function (data) {
       console.log('[Grist Widget] Ref_Format chargé :', data.id.length, 'formats');
       populateMultiSelect('format-donnees', data.id, data.valeur);
-      if (lastLoadedRecord) {
-        populateFormFromRecord(lastLoadedRecord);
-      }
+      rehydrateIfRecordLoaded();
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Format :', err.message);
     });
@@ -325,9 +322,7 @@
     fetchTable('Ref_Licence').then(function (data) {
       console.log('[Grist Widget] Ref_Licence chargé :', data.id.length, 'licences');
       populateSelect('licence', data.id, data.valeur);
-      if (lastLoadedRecord) {
-        populateFormFromRecord(lastLoadedRecord);
-      }
+      rehydrateIfRecordLoaded();
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Licence :', err.message);
     });
@@ -494,6 +489,11 @@
   // === Gestion des records ===
 
   function onRecordChange(record, mappings) {
+    console.log('[Grist Widget] onRecordChange déclenché. Record brut :', JSON.stringify(record));
+    console.log('[Grist Widget] onRecordChange déclenché. Mappings :', JSON.stringify(mappings));
+    
+    lastLoadedRawRecord = record;
+
     // Si mappings sont disponibles, les utiliser pour le nommage flexible
     if (mappings) {
       var mapped = grist.mapColumnNames(record, {
@@ -504,9 +504,11 @@
         console.warn('[Grist Widget] Colonnes non mappées. Veuillez mapper les colonnes du formulaire.');
         return;
       }
+      console.log('[Grist Widget] Record mappé avec succès :', JSON.stringify(mapped));
       lastLoadedRecord = mapped;
       populateFormFromRecord(mapped);
     } else if (record) {
+      console.log('[Grist Widget] Pas de mappings ou mappings invalides. Utilisation du record brut.');
       lastLoadedRecord = record;
       populateFormFromRecord(record);
     }
@@ -517,12 +519,24 @@
 
   function populateFormFromRecord(record) {
     if (!record) return;
+    console.log('[Grist Widget] populateFormFromRecord appelé avec le record :', JSON.stringify(record));
+    if (lastLoadedRawRecord) {
+      console.log('[Grist Widget] Record brut de repli :', JSON.stringify(lastLoadedRawRecord));
+    }
+    
     Object.keys(FIELD_MAP).forEach(function (gristField) {
       var formFieldId = FIELD_MAP[gristField];
       var el = document.getElementById(formFieldId);
       if (!el) return;
 
+      // Recherche dans le record fourni, fallback sur le record brut si undefined (flexibilité complète)
       var value = record[gristField];
+      if (value === undefined && lastLoadedRawRecord) {
+        value = lastLoadedRawRecord[gristField];
+        console.log('[Grist Widget] Champ', gristField, '-> Repli brut : ', JSON.stringify(value));
+      } else {
+        console.log('[Grist Widget] Champ', gristField, '-> Direct : ', JSON.stringify(value));
+      }
 
       // Bureau producteur : cherche le chemin correspondant à l'ID reçu de Grist
       if (formFieldId === 'bureau-producteur') {
@@ -714,6 +728,7 @@
   window.clearFormForCreate = function () {
     currentRecordId = null;
     lastLoadedRecord = null;
+    lastLoadedRawRecord = null;
 
     console.log('[Grist Widget] Formulaire délié de Grist (Prêt pour la création)');
 
