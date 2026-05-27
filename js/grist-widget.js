@@ -18,6 +18,7 @@
   var currentRecordId = null;
   var refTablesLoaded = false;
   var allBureaux = [];
+  var lastLoadedRecord = null;
 
   // === Initialisation du widget Grist ===
 
@@ -138,8 +139,20 @@
       allBureaux.sort(function (a, b) {
         return a.chemin.localeCompare(b.chemin);
       });
-      renderBureauxOptions('', null);
+      renderBureauxOptions();
       setupBureauSearch();
+
+      // Si un record a été chargé avant la fin du chargement des bureaux, ré-hydrate le champ
+      if (lastLoadedRecord) {
+        var el = document.getElementById('bureau-producteur');
+        if (el) {
+          var bureauVal = lastLoadedRecord.Bureau_Producteur;
+          var selectedId = bureauVal ? Number(bureauVal) : null;
+          var found = allBureaux.find(function (b) { return b.id === selectedId; });
+          el.value = found ? found.chemin : '';
+          updateDeducedBalf(selectedId);
+        }
+      }
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Entite :', err.message);
     });
@@ -195,40 +208,23 @@
 
   }
 
-  function renderBureauxOptions(filterText, selectedId) {
-    var select = document.getElementById('bureau-producteur');
-    if (!select) return;
+  function getBureauIdFromChemin(chemin) {
+    if (!chemin) return null;
+    var found = allBureaux.find(function (b) { return b.chemin === chemin; });
+    return found ? found.id : null;
+  }
 
-    if (selectedId === null || selectedId === undefined) {
-      selectedId = select.value ? Number(select.value) : null;
-    }
+  function renderBureauxOptions() {
+    var datalist = document.getElementById('bureau-producteur-list');
+    if (!datalist) return;
 
-    select.innerHTML = '';
-
-    var defaultOpt = document.createElement('option');
-    defaultOpt.value = '';
-    defaultOpt.disabled = true;
-    defaultOpt.selected = !selectedId;
-    defaultOpt.textContent = filterText ? 'Sélectionner parmi les résultats...' : 'Sélectionner un bureau';
-    select.appendChild(defaultOpt);
-
-    var filter = filterText.toLowerCase();
+    datalist.innerHTML = '';
 
     for (var i = 0; i < allBureaux.length; i++) {
       var b = allBureaux[i];
-      if (filter && b.chemin.toLowerCase().indexOf(filter) === -1) {
-        if (b.id !== selectedId) {
-          continue;
-        }
-      }
-
       var opt = document.createElement('option');
-      opt.value = String(b.id);
-      opt.textContent = b.chemin;
-      if (b.id === selectedId) {
-        opt.selected = true;
-      }
-      select.appendChild(opt);
+      opt.value = b.chemin;
+      datalist.appendChild(opt);
     }
   }
 
@@ -252,27 +248,18 @@
   }
 
   function setupBureauSearch() {
-    var searchInput = document.getElementById('bureau-producteur-search');
     var select = document.getElementById('bureau-producteur');
     if (!select) return;
 
     if (select.dataset.changeListenerAdded !== 'true') {
-      select.addEventListener('change', function () {
-        updateDeducedBalf(select.value);
-      });
+      var handler = function () {
+        var bureauId = getBureauIdFromChemin(select.value);
+        updateDeducedBalf(bureauId);
+      };
+      select.addEventListener('input', handler);
+      select.addEventListener('change', handler);
       select.dataset.changeListenerAdded = 'true';
     }
-
-    if (!searchInput) return;
-
-    if (searchInput.dataset.listenerAdded === 'true') return;
-
-    searchInput.addEventListener('input', function (e) {
-      renderBureauxOptions(e.target.value);
-      select.dispatchEvent(new Event('change', { bubbles: true }));
-    });
-
-    searchInput.dataset.listenerAdded = 'true';
   }
 
   /**
@@ -326,6 +313,7 @@
   // === Gestion des records ===
 
   function onRecordChange(record, mappings) {
+    lastLoadedRecord = record;
     // Mapping des colonnes Grist vers les IDs du formulaire HTML
     var fieldMap = {
       'Titre': 'titre',
@@ -395,12 +383,11 @@
 
       var value = record[gristField];
 
-      // Bureau producteur : réinitialise la recherche et recharge toutes les options en ciblant la bonne sélection
+      // Bureau producteur : cherche le chemin correspondant à l'ID reçu de Grist
       if (formFieldId === 'bureau-producteur') {
-        var searchInput = document.getElementById('bureau-producteur-search');
-        if (searchInput) searchInput.value = '';
         var selectedId = value ? Number(value) : null;
-        renderBureauxOptions('', selectedId);
+        var found = allBureaux.find(function (b) { return b.id === selectedId; });
+        el.value = found ? found.chemin : '';
         updateDeducedBalf(selectedId);
         return;
       }
@@ -516,7 +503,7 @@
         // Niveau 3
         'Organisation': toRef(formData.Organisation),
         'Service': toRef(formData.Service),
-        'Bureau_Producteur': toRef(formData.Bureau_Producteur),
+        'Bureau_Producteur': getBureauIdFromChemin(formData.Bureau_Producteur) || toRef(formData.Bureau_Producteur),
         'Commanditaire': formData.Commanditaire,
         'Systeme_d_Information': toGristList(toRefList(formData.Systeme_d_Information)),
         'Frequence_MaJ': toRef(formData.Frequence_MaJ),

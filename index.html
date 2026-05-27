@@ -105,10 +105,31 @@
                   </div>
                   <div class="fr-col-12 fr-col-md-6">
                     <div class="fr-input-group">
-                      <label class="fr-label" for="url" autocomplete="off">
+                      <label class="fr-label" for="bureau-producteur" aria-required="true">
+                        Bureau producteur <span class="fr-text--bold" aria-hidden="true">*</span>
+                      </label>
+                      <input class="fr-input" type="text" id="bureau-producteur" name="bureau-producteur" list="bureau-producteur-list" placeholder="Saisissez ou sélectionnez un bureau..." required aria-required="true" autocomplete="off">
+                      <datalist id="bureau-producteur-list"></datalist>
+                      <p class="fr-hint-text">Table Ref_Entite (recherche arborescente).</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="fr-fieldset__element">
+                <div class="fr-grid-row fr-grid-row--gutters">
+                  <div class="fr-col-12 fr-col-md-6">
+                    <div class="fr-input-group">
+                      <label class="fr-label" for="url">
                         URL du dataset
                       </label>
-                      <input class="fr-input" type="url" id="url" name="url" autocomplete="off">
+                      <input class="fr-input" type="url" id="url" name="url" autocomplete="off" placeholder="ex: https://example.com/dataset">
+                    </div>
+                  </div>
+                  <div class="fr-col-12 fr-col-md-6">
+                    <div class="fr-input-group">
+                      <label class="fr-label" for="contact-service-display">Point de contact service (BALF)</label>
+                      <input class="fr-input" type="text" id="contact-service-display" readonly disabled placeholder="Sélectionnez un bureau producteur...">
+                      <p class="fr-hint-text">Déduit automatiquement de la boîte fonctionnelle (BALF) du bureau.</p>
                     </div>
                   </div>
                 </div>
@@ -245,12 +266,11 @@
                     <div class="fr-grid-row fr-grid-row--gutters">
                       <div class="fr-col-12 fr-col-md-6">
                         <div class="fr-select-group">
-                          <label class="fr-label" for="bureau-producteur">Bureau producteur</label>
-                          <input class="fr-input fr-mb-2v" type="text" id="bureau-producteur-search" placeholder="Filtrer les bureaux..." autocomplete="off">
-                          <select class="fr-select" id="bureau-producteur" name="bureau-producteur">
-                            <option value="" disabled selected>Chargement…</option>
+                          <label class="fr-label" for="contact">Contact principal</label>
+                          <select class="fr-select" id="contact" name="contact">
+                            <option value="" disabled selected>Sélectionner un contact</option>
                           </select>
-                          <p class="fr-hint-text">Table Ref_Entite.</p>
+                          <p class="fr-hint-text">Table Ref_Utilisateur.</p>
                         </div>
                       </div>
                       <div class="fr-col-12 fr-col-md-6">
@@ -265,20 +285,20 @@
                     <div class="fr-grid-row fr-grid-row--gutters">
                       <div class="fr-col-12 fr-col-md-6">
                         <div class="fr-select-group">
-                          <label class="fr-label" for="systeme-information">Système d'information</label>
-                          <select class="fr-select" id="systeme-information" name="systeme-information" multiple>
-                            <option value="" disabled>Chargement…</option>
-                          </select>
-                          <p class="fr-hint-text">Plusieurs sélections possibles. Table Ref_InformationSystem.</p>
-                        </div>
-                      </div>
-                      <div class="fr-col-12 fr-col-md-6">
-                        <div class="fr-select-group">
                           <label class="fr-label" for="frequence-maj">Fréquence de mise à jour</label>
                           <select class="fr-select" id="frequence-maj" name="frequence-maj">
                             <option value="" disabled selected>Chargement…</option>
                           </select>
                           <p class="fr-hint-text">Table Ref_Frequency.</p>
+                        </div>
+                      </div>
+                      <div class="fr-col-12 fr-col-md-6">
+                        <div class="fr-select-group">
+                          <label class="fr-label" for="systeme-information">Système d'information</label>
+                          <select class="fr-select" id="systeme-information" name="systeme-information" multiple>
+                            <option value="" disabled>Chargement…</option>
+                          </select>
+                          <p class="fr-hint-text">Plusieurs sélections possibles. Table Ref_InformationSystem.</p>
                         </div>
                       </div>
                     </div>
@@ -303,59 +323,18 @@
               </div>
             </section>
 
-            <!-- Section 4 — Contact (Niveau 4, accordéon) -->
+
+            <!-- Section 4 — Technique & Distribution (Niveau 4, accordéon) -->
             <section class="fr-accordion" id="section4-accordion">
               <h3 class="fr-accordion__title">
                 <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="section4-content">
-                  <span class="fr-text--bold">Niveau 4 - Contact</span>
-                  Désigner un interlocuteur ressource
+                  <span class="fr-text--bold">Niveau 4 - Technique & Distribution</span>
+                  Accès physique et détails techniques des données
                 </button>
               </h3>
               <div class="fr-collapse" id="section4-content">
                 <fieldset class="fr-fieldset" aria-labelledby="section4-legend">
                   <legend class="fr-fieldset__legend" id="section4-legend">
-                    <h2 class="fr-h5">Contact</h2>
-                  </legend>
-                  <div class="fr-fieldset__element">
-                    <div class="fr-grid-row fr-grid-row--gutters">
-                      <div class="fr-col-12 fr-col-md-6">
-                        <div class="fr-select-group">
-                          <label class="fr-label" for="contact">Contact principal</label>
-                          <select class="fr-select" id="contact" name="contact">
-                            <option value="" disabled selected>Sélectionner un contact</option>
-                            <option value="user-1">Paul — SNUM</option>
-                            <option value="user-2">Marie — DGFIP</option>
-                            <option value="user-3">Jean — SG</option>
-                            <option value="user-4">Sophie — DGE</option>
-                            <option value="user-5">Luc — DAJ</option>
-                          </select>
-                          <p class="fr-hint-text">Table Ref_Utilisateur.</p>
-                        </div>
-                      </div>
-                      <div class="fr-col-12 fr-col-md-6">
-                        <div class="fr-input-group">
-                          <label class="fr-label" for="contact-service-display">Point de contact service (BALF)</label>
-                          <input class="fr-input" type="text" id="contact-service-display" readonly disabled placeholder="Sélectionnez un bureau producteur...">
-                          <p class="fr-hint-text">Déduit de la boîte fonctionnelle (BALF) du bureau.</p>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </fieldset>
-              </div>
-            </section>
-
-            <!-- Section 5 — Technique & Distribution (Niveau 5, accordéon) -->
-            <section class="fr-accordion" id="section5-accordion">
-              <h3 class="fr-accordion__title">
-                <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="section5-content">
-                  <span class="fr-text--bold">Niveau 5 - Technique & Distribution</span>
-                  Accès physique et détails techniques des données
-                </button>
-              </h3>
-              <div class="fr-collapse" id="section5-content">
-                <fieldset class="fr-fieldset" aria-labelledby="section5-legend">
-                  <legend class="fr-fieldset__legend" id="section5-legend">
                     <h2 class="fr-h5">Technique & Distribution</h2>
                   </legend>
                   <div class="fr-fieldset__element">
@@ -416,17 +395,17 @@
               </div>
             </section>
 
-            <!-- Section 6 — Qualification (Niveau 6, accordéon) -->
-            <section class="fr-accordion" id="section6-accordion">
+            <!-- Section 5 — Qualification (Niveau 5, accordéon) -->
+            <section class="fr-accordion" id="section5-accordion">
               <h3 class="fr-accordion__title">
-                <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="section6-content">
-                  <span class="fr-text--bold">Niveau 6 - Qualification</span>
+                <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="section5-content">
+                  <span class="fr-text--bold">Niveau 5 - Qualification</span>
                   Auto-évaluation de la maturité des métadonnées (calculé automatiquement)
                 </button>
               </h3>
-              <div class="fr-collapse" id="section6-content">
-                <fieldset class="fr-fieldset" aria-labelledby="section6-legend">
-                  <legend class="fr-fieldset__legend" id="section6-legend">
+              <div class="fr-collapse" id="section5-content">
+                <fieldset class="fr-fieldset" aria-labelledby="section5-legend">
+                  <legend class="fr-fieldset__legend" id="section5-legend">
                     <h2 class="fr-h5">Qualification</h2>
                     <p class="fr-hint-text">Ces champs sont calculés automatiquement en fonction des métadonnées saisies.</p>
                   </legend>

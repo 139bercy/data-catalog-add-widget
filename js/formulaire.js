@@ -12,7 +12,7 @@
   // === Constantes ===
 
   // Champs requis du Niveau 1 (Identification)
-  const REQUIRED_FIELDS = ['titre', 'description', 'mots-cles'];
+  const REQUIRED_FIELDS = ['titre', 'description', 'mots-cles', 'bureau-producteur'];
 
   // Champs utilisés dans la formule Score_Completude (schema-grist.md)
   const COMPLETENESS_FIELDS = [
