@@ -377,4 +377,8 @@
   calculateScore();
   calculateBadge();
 
+  // Exposer les fonctions de calcul globalement pour le widget Grist
+  window.calculateScore = calculateScore;
+  window.calculateBadge = calculateBadge;
+
 })();

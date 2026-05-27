@@ -20,6 +20,113 @@
   var allBureaux = [];
   var lastLoadedRecord = null;
 
+  // Mapping des colonnes Grist vers les IDs du formulaire HTML
+  var FIELD_MAP = {
+    'Titre': 'titre',
+    'Description': 'description',
+    'URL': 'url',
+    'Mots_Cles': 'mots-cles',
+    'Statut_Publication': 'statut-publication',
+    'Niveau_Sensibilite': 'niveau-sensibilite',
+    'Domaine_Fonctionnel': 'domaine-fonctionnel',
+    
+    // Niveau 2
+    'Langue': 'langue',
+    'Couverture_Geo': 'couverture-geo',
+    'Periode_de_couverture_Date_de_debut': 'periode-debut',
+    'Periode_de_couverture_Date_de_fin': 'periode-fin',
+
+    // Niveau 3
+    'Organisation': 'organisation',
+    'Service': 'service',
+    'Bureau_Producteur': 'bureau-producteur',
+    'Commanditaire': 'commanditaire',
+    'Systeme_d_Information': 'systeme-information',
+    'Frequence_MaJ': 'frequence-maj',
+    'Date_Publication': 'date-publication',
+    'Date_MaJ': 'date-maj',
+
+    // Niveau 4
+    'Contact_Service': 'contact-service',
+    'Contact': 'contact',
+
+    // Niveau 5
+    'URL_de_telechargement': 'url-telechargement',
+    'Format_Donnees': 'format-donnees',
+    'Licence': 'licence',
+    'Volumetrie_en_Mo_': 'volumetrie',
+    'Donnees_ouvertes': 'donnees-ouvertes',
+    'URL_Open_Data': 'url-open-data',
+
+    // Niveau 6
+    'Statut_Qualification': 'statut-qualification',
+  };
+
+  // === Helpers pour décoder les types de référence de Grist ===
+
+  /**
+   * Extrait l'ID numérique d'une référence Grist de manière robuste.
+   * Grist retourne les références sous différents formats selon le contexte :
+   * - Un simple ID (ex: 12)
+   * - Un tableau (ex: ["R", "Ref_Entite", 12])
+   * - Un objet (ex: { id: 12 })
+   * - null ou undefined
+   */
+  function parseGristReferenceId(value) {
+    if (value === null || value === undefined) return null;
+    
+    // Cas 1 : Nombre simple ou chaîne numérique
+    if (typeof value === 'number') return value;
+    if (typeof value === 'string' && !isNaN(Number(value))) return Number(value);
+    
+    // Cas 2 : Tableau standard de référence Grist ["R", "TableName", id]
+    if (Array.isArray(value)) {
+      if (value[0] === 'R' && value.length >= 3) {
+        return Number(value[2]);
+      }
+      if (value.length > 0) {
+        var lastEl = value[value.length - 1];
+        if (typeof lastEl === 'number') return lastEl;
+        if (lastEl !== null && lastEl !== undefined && !isNaN(Number(lastEl))) return Number(lastEl);
+      }
+    }
+    
+    // Cas 3 : Objet avec clé "id"
+    if (typeof value === 'object') {
+      if (value.id !== undefined && value.id !== null) {
+        return Number(value.id);
+      }
+    }
+    
+    return null;
+  }
+
+  /**
+   * Extrait un tableau d'IDs numériques d'une ReferenceList ou ChoiceList Grist.
+   * Supporte les formats :
+   * - ["L", ["R", "Table", id1], ["R", "Table", id2]]
+   * - ["L", id1, id2]
+   * - [id1, id2]
+   */
+  function parseGristReferenceListIds(value) {
+    if (value === null || value === undefined) return [];
+    if (!Array.isArray(value)) {
+      var singleId = parseGristReferenceId(value);
+      return singleId !== null ? [singleId] : [];
+    }
+    
+    // Enlever le marqueur de liste Grist ("L") s'il est présent
+    var list = value[0] === 'L' ? value.slice(1) : value;
+    var ids = [];
+    for (var i = 0; i < list.length; i++) {
+      var id = parseGristReferenceId(list[i]);
+      if (id !== null) {
+        ids.push(id);
+      }
+    }
+    return ids;
+  }
+
   // === Initialisation du widget Grist ===
 
   function initGristWidget() {
@@ -117,6 +224,9 @@
     fetchTable('Ref_Utilisateur').then(function (data) {
       console.log('[Grist Widget] Ref_Utilisateur chargé :', data.id.length, 'utilisateurs');
       populateSelect('contact', data.id, data.Nom, data.Prenom);
+      if (lastLoadedRecord) {
+        populateFormFromRecord(lastLoadedRecord);
+      }
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Utilisateur :', err.message);
     });
@@ -145,8 +255,7 @@
       if (lastLoadedRecord) {
         var el = document.getElementById('bureau-producteur');
         if (el) {
-          var bureauVal = lastLoadedRecord.Bureau_Producteur;
-          var selectedId = bureauVal ? Number(bureauVal) : null;
+          var selectedId = parseGristReferenceId(lastLoadedRecord.Bureau_Producteur);
           var found = allBureaux.find(function (b) { return b.id === selectedId; });
           el.value = found ? found.chemin : '';
           updateDeducedBalf(selectedId);
@@ -160,6 +269,9 @@
     fetchTable('Ref_Theme').then(function (data) {
       console.log('[Grist Widget] Ref_Theme chargé :', data.id.length, 'thèmes');
       populateSelect('domaine-fonctionnel', data.id, data.valeur);
+      if (lastLoadedRecord) {
+        populateFormFromRecord(lastLoadedRecord);
+      }
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Theme :', err.message);
     });
@@ -168,6 +280,9 @@
     fetchTable('Ref_InformationSystem').then(function (data) {
       console.log('[Grist Widget] Ref_InformationSystem chargé :', data.id.length, 'systèmes');
       populateMultiSelect('systeme-information', data.id, data.SI);
+      if (lastLoadedRecord) {
+        populateFormFromRecord(lastLoadedRecord);
+      }
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_InformationSystem :', err.message);
     });
@@ -177,6 +292,9 @@
     fetchTable('Ref_Frequency').then(function (data) {
       console.log('[Grist Widget] Ref_Frequency chargé :', data.id.length, 'fréquences');
       populateSelect('frequence-maj', data.id, data.valeur);
+      if (lastLoadedRecord) {
+        populateFormFromRecord(lastLoadedRecord);
+      }
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Frequency :', err.message);
     });
@@ -185,6 +303,9 @@
     fetchTable('Ref_GeographicalCoverage').then(function (data) {
       console.log('[Grist Widget] Ref_GeographicalCoverage chargé :', data.id.length, 'zones géo');
       populateMultiSelect('couverture-geo', data.id, data.valeur);
+      if (lastLoadedRecord) {
+        populateFormFromRecord(lastLoadedRecord);
+      }
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_GeographicalCoverage :', err.message);
     });
@@ -193,6 +314,9 @@
     fetchTable('Ref_Format').then(function (data) {
       console.log('[Grist Widget] Ref_Format chargé :', data.id.length, 'formats');
       populateMultiSelect('format-donnees', data.id, data.valeur);
+      if (lastLoadedRecord) {
+        populateFormFromRecord(lastLoadedRecord);
+      }
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Format :', err.message);
     });
@@ -201,6 +325,9 @@
     fetchTable('Ref_Licence').then(function (data) {
       console.log('[Grist Widget] Ref_Licence chargé :', data.id.length, 'licences');
       populateSelect('licence', data.id, data.valeur);
+      if (lastLoadedRecord) {
+        populateFormFromRecord(lastLoadedRecord);
+      }
     }).catch(function (err) {
       console.warn('[Grist Widget] Impossible de charger Ref_Licence :', err.message);
     });
@@ -367,49 +494,6 @@
   // === Gestion des records ===
 
   function onRecordChange(record, mappings) {
-    lastLoadedRecord = record;
-    // Mapping des colonnes Grist vers les IDs du formulaire HTML
-    var fieldMap = {
-      'Titre': 'titre',
-      'Description': 'description',
-      'URL': 'url',
-      'Mots_Cles': 'mots-cles',
-      'Statut_Publication': 'statut-publication',
-      'Niveau_Sensibilite': 'niveau-sensibilite',
-      'Domaine_Fonctionnel': 'domaine-fonctionnel',
-      
-      // Niveau 2
-      'Langue': 'langue',
-      'Couverture_Geo': 'couverture-geo',
-      'Periode_de_couverture_Date_de_debut': 'periode-debut',
-      'Periode_de_couverture_Date_de_fin': 'periode-fin',
-
-      // Niveau 3
-      'Organisation': 'organisation',
-      'Service': 'service',
-      'Bureau_Producteur': 'bureau-producteur',
-      'Commanditaire': 'commanditaire',
-      'Systeme_d_Information': 'systeme-information',
-      'Frequence_MaJ': 'frequence-maj',
-      'Date_Publication': 'date-publication',
-      'Date_MaJ': 'date-maj',
-
-      // Niveau 4
-      'Contact_Service': 'contact-service',
-      'Contact': 'contact',
-
-      // Niveau 5
-      'URL_de_telechargement': 'url-telechargement',
-      'Format_Donnees': 'format-donnees',
-      'Licence': 'licence',
-      'Volumetrie_en_Mo_': 'volumetrie',
-      'Donnees_ouvertes': 'donnees-ouvertes',
-      'URL_Open_Data': 'url-open-data',
-
-      // Niveau 6
-      'Statut_Qualification': 'statut-qualification',
-    };
-
     // Si mappings sont disponibles, les utiliser pour le nommage flexible
     if (mappings) {
       var mapped = grist.mapColumnNames(record, {
@@ -420,18 +504,21 @@
         console.warn('[Grist Widget] Colonnes non mappées. Veuillez mapper les colonnes du formulaire.');
         return;
       }
-      populateFormFromRecord(mapped, fieldMap);
+      lastLoadedRecord = mapped;
+      populateFormFromRecord(mapped);
     } else if (record) {
-      populateFormFromRecord(record, fieldMap);
+      lastLoadedRecord = record;
+      populateFormFromRecord(record);
     }
 
     // Stocke l'ID du record courant pour la mise à jour
     currentRecordId = record ? record.id : null;
   }
 
-  function populateFormFromRecord(record, fieldMap) {
-    Object.keys(fieldMap).forEach(function (gristField) {
-      var formFieldId = fieldMap[gristField];
+  function populateFormFromRecord(record) {
+    if (!record) return;
+    Object.keys(FIELD_MAP).forEach(function (gristField) {
+      var formFieldId = FIELD_MAP[gristField];
       var el = document.getElementById(formFieldId);
       if (!el) return;
 
@@ -439,7 +526,7 @@
 
       // Bureau producteur : cherche le chemin correspondant à l'ID reçu de Grist
       if (formFieldId === 'bureau-producteur') {
-        var selectedId = value ? Number(value) : null;
+        var selectedId = parseGristReferenceId(value);
         var found = allBureaux.find(function (b) { return b.id === selectedId; });
         el.value = found ? found.chemin : '';
         updateDeducedBalf(selectedId);
@@ -459,21 +546,35 @@
 
       if (el.tagName === 'SELECT' && el.hasAttribute('multiple')) {
         // ChoiceList / ReferenceList : sélectionne les options correspondantes
-        // Les IDs Grist sont des numbers, option.value est un string → coercion
-        if (Array.isArray(value)) {
-          var cleanList = value[0] === 'L' ? value.slice(1) : value;
-          Array.from(el.options).forEach(function (option) {
-            var optVal = option.value;
-            option.selected = cleanList.indexOf(Number(optVal)) !== -1 || cleanList.indexOf(optVal) !== -1;
-          });
+        var cleanList = [];
+        var refListFields = ['couverture-geo', 'systeme-information', 'format-donnees'];
+        if (refListFields.indexOf(formFieldId) !== -1) {
+          cleanList = parseGristReferenceListIds(value);
+        } else {
+          // ChoiceList standard
+          if (Array.isArray(value)) {
+            cleanList = value[0] === 'L' ? value.slice(1) : value;
+          } else if (value !== null && value !== undefined) {
+            cleanList = [value];
+          }
         }
+
+        Array.from(el.options).forEach(function (option) {
+          var optVal = option.value;
+          option.selected = cleanList.indexOf(Number(optVal)) !== -1 || cleanList.indexOf(optVal) !== -1;
+        });
       } else if (el.type === 'checkbox') {
         el.checked = Boolean(value);
       } else if (el.type === 'date') {
         el.value = value ? String(value).substring(0, 10) : '';
       } else if (el.tagName === 'SELECT') {
-        // Choice / Reference simple → coerce en string pour match option.value
-        el.value = (value !== null && value !== undefined) ? String(value) : '';
+        // Choice / Reference simple
+        var cleanValue = value;
+        var refFields = ['domaine-fonctionnel', 'organisation', 'service', 'frequence-maj', 'contact-service', 'contact', 'licence'];
+        if (refFields.indexOf(formFieldId) !== -1) {
+          cleanValue = parseGristReferenceId(value);
+        }
+        el.value = (cleanValue !== null && cleanValue !== undefined) ? String(cleanValue) : '';
       } else {
         // Text / URL / textarea / numeric
         el.value = (value !== null && value !== undefined) ? value : '';
