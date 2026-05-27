@@ -463,6 +463,39 @@
               </button>
             </div>
 
+            <!-- Zone de diagnostic (Développeur) -->
+            <section class="fr-accordion fr-mt-6w" id="diagnostic-accordion" style="border: 1px solid #ddd; border-radius: 4px; margin-top: 3rem;">
+              <h3 class="fr-accordion__title">
+                <button type="button" class="fr-accordion__btn" aria-expanded="false" aria-controls="diagnostic-content">
+                  Diagnostic & Débogage Grist
+                </button>
+              </h3>
+              <div class="fr-collapse" id="diagnostic-content">
+                <div style="padding: 1.5rem; background-color: #f6f6f6; font-family: monospace; font-size: 0.85rem;">
+                  <div class="fr-grid-row fr-grid-row--gutters">
+                    <div class="fr-col-12">
+                      <p style="margin-bottom: 0.5rem;"><strong>ID Record Courant :</strong> <span id="diag-record-id">Aucun (Création)</span></p>
+                      <p style="margin-bottom: 0.5rem;"><strong>État des Tables de Référence :</strong></p>
+                      <ul style="margin-bottom: 1rem; padding-left: 1.5rem;">
+                        <li>Bureaux (Ref_Entite) : <span id="diag-count-bureaux">0</span> chargés</li>
+                        <li>Contacts (Ref_Utilisateur) : <span id="diag-count-contacts">0</span> chargés</li>
+                        <li>Thématiques (Ref_Theme) : <span id="diag-count-themes">0</span> chargés</li>
+                        <li>Fréquences (Ref_Frequency) : <span id="diag-count-frequencies">0</span> chargés</li>
+                      </ul>
+                    </div>
+                    <div class="fr-col-12 fr-col-md-6">
+                      <p style="margin-bottom: 0.5rem;"><strong>Record Mappé Grist (FIELD_MAP) :</strong></p>
+                      <pre id="diag-mapped-record" style="white-space: pre-wrap; background: #fff; padding: 10px; border: 1px solid #ccc; max-height: 250px; overflow-y: auto; margin-top: 0;">{}</pre>
+                    </div>
+                    <div class="fr-col-12 fr-col-md-6">
+                      <p style="margin-bottom: 0.5rem;"><strong>Record Brut Grist :</strong></p>
+                      <pre id="diag-raw-record" style="white-space: pre-wrap; background: #fff; padding: 10px; border: 1px solid #ccc; max-height: 250px; overflow-y: auto; margin-top: 0;">{}</pre>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
           </form>
 
         </div>

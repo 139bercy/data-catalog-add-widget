@@ -226,6 +226,7 @@
       if (recordToLoad) {
         populateFormFromRecord(recordToLoad);
       }
+      updateDiagnosticUI();
     }
 
     // 1. Ref_Utilisateur
@@ -494,27 +495,28 @@
     
     lastLoadedRawRecord = record;
 
-    // Si mappings sont disponibles, les utiliser pour le nommage flexible
+    var mapped = null;
     if (mappings) {
-      var mapped = grist.mapColumnNames(record, {
+      mapped = grist.mapColumnNames(record, {
         columns: grist.ready.columns,
         mappings: mappings,
       });
-      if (!mapped) {
-        console.warn('[Grist Widget] Colonnes non mappées. Veuillez mapper les colonnes du formulaire.');
-        return;
-      }
+    }
+
+    if (mapped) {
       console.log('[Grist Widget] Record mappé avec succès :', JSON.stringify(mapped));
       lastLoadedRecord = mapped;
       populateFormFromRecord(mapped);
     } else if (record) {
-      console.log('[Grist Widget] Pas de mappings ou mappings invalides. Utilisation du record brut.');
+      console.log('[Grist Widget] Utilisation du record brut (mappings absents, incomplets ou nuls).');
       lastLoadedRecord = record;
       populateFormFromRecord(record);
     }
 
     // Stocke l'ID du record courant pour la mise à jour
     currentRecordId = record ? record.id : null;
+    
+    updateDiagnosticUI();
   }
 
   function populateFormFromRecord(record) {
@@ -601,6 +603,41 @@
     }
     if (typeof window.calculateBadge === 'function') {
       window.calculateBadge();
+    }
+    
+    updateDiagnosticUI();
+  }
+
+  function updateDiagnosticUI() {
+    try {
+      var diagId = document.getElementById('diag-record-id');
+      var diagCountBureaux = document.getElementById('diag-count-bureaux');
+      var diagCountContacts = document.getElementById('diag-count-contacts');
+      var diagCountThemes = document.getElementById('diag-count-themes');
+      var diagCountFreqs = document.getElementById('diag-count-frequencies');
+      var diagMapped = document.getElementById('diag-mapped-record');
+      var diagRaw = document.getElementById('diag-raw-record');
+
+      if (diagId) diagId.textContent = currentRecordId ? currentRecordId : 'Aucun (Création)';
+      if (diagCountBureaux) diagCountBureaux.textContent = allBureaux ? allBureaux.length : 0;
+      
+      if (diagCountContacts) {
+        var el = document.getElementById('contact');
+        diagCountContacts.textContent = el ? Math.max(0, el.options.length - 1) : 0;
+      }
+      if (diagCountThemes) {
+        var el = document.getElementById('domaine-fonctionnel');
+        diagCountThemes.textContent = el ? Math.max(0, el.options.length - 1) : 0;
+      }
+      if (diagCountFreqs) {
+        var el = document.getElementById('frequence-maj');
+        diagCountFreqs.textContent = el ? Math.max(0, el.options.length - 1) : 0;
+      }
+
+      if (diagMapped) diagMapped.textContent = lastLoadedRecord ? JSON.stringify(lastLoadedRecord, null, 2) : '{}';
+      if (diagRaw) diagRaw.textContent = lastLoadedRawRecord ? JSON.stringify(lastLoadedRawRecord, null, 2) : '{}';
+    } catch (e) {
+      console.warn('[Grist Widget] Erreur mise à jour Diagnostic UI :', e);
     }
   }
 
@@ -744,6 +781,7 @@
     }
 
     updateDeducedBalf(null);
+    updateDiagnosticUI();
   };
 
   // === Démarrage ===
