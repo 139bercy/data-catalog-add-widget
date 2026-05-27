@@ -219,6 +219,7 @@
     if (!datalist) return;
 
     datalist.innerHTML = '';
+    console.log('[Grist Widget] Populating datalist with', allBureaux.length, 'options');
 
     for (var i = 0; i < allBureaux.length; i++) {
       var b = allBureaux[i];
