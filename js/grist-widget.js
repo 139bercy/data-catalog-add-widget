@@ -131,7 +131,7 @@
 
   /**
    * Sélectionne une option dans un élément <select> par sa valeur (ID) ou par son texte (affichage de référence).
-   * Gère de manière transparente les deux types de retours de Grist.
+   * Supporte le match exact par ID, le match exact par texte et le match partiel (ex: "SG - SI-A" matches "SI-A").
    */
   function selectOptionByValueOrText(selectEl, valueOrText) {
     if (!selectEl) return;
@@ -152,9 +152,14 @@
     var lowercaseVal = strVal.toLowerCase();
     for (var i = 0; i < selectEl.options.length; i++) {
       var option = selectEl.options[i];
-      if (option.text.trim().toLowerCase() === lowercaseVal) {
+      var optText = option.text.trim().toLowerCase();
+      
+      // Match exact par texte, ou match partiel (utile pour les libellés avec préfixes ou suffixes comme "Sigle - SI")
+      if (optText === lowercaseVal || 
+          (optText.length > 2 && lowercaseVal.indexOf(optText) !== -1) || 
+          (lowercaseVal.length > 2 && optText.indexOf(lowercaseVal) !== -1)) {
         selectEl.value = option.value;
-        return; // Match réussi par texte !
+        return; // Match réussi !
       }
     }
     
@@ -164,6 +169,7 @@
 
   /**
    * Sélectionne des options dans un élément <select multiple> par leurs valeurs (IDs) ou par leurs textes.
+   * Supporte les formats d'ID, les tableaux ["R", table, id], et les libellés d'affichage exacts ou partiels.
    */
   function selectMultipleOptionsByValuesOrTexts(selectEl, valuesOrTexts) {
     if (!selectEl) return;
@@ -188,7 +194,12 @@
       var isSelected = false;
       for (var i = 0; i < items.length; i++) {
         var item = items[i];
-        if (item === optVal || item.toLowerCase() === optText) {
+        var itemLower = item.toLowerCase();
+        
+        // Match exact par ID, match exact par texte, ou match partiel (ex: "Direction - SI" contient "SI")
+        if (item === optVal || itemLower === optText || 
+            (optText.length > 2 && itemLower.indexOf(optText) !== -1) || 
+            (itemLower.length > 2 && optText.indexOf(itemLower) !== -1)) {
           isSelected = true;
           break;
         }
