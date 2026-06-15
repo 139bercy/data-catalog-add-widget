@@ -1,0 +1,1 @@
+- [ ] Ajouter des ressources REF:: directement depuis le formulaire.

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fiche Pratique - Catalogage des données</title>
+  <meta name="description" content="Fiche pratique pour cataloguer un jeu de données dans le catalogue Grist du MEF">
+
+  <!-- DSFR -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/dsfr.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/utility/icons/icons.min.css">
+  <link rel="stylesheet" href="css/custom.css">
+
+  <style>
+    /* Styles spécifiques pour le rendu de la documentation */
+    .sticky-sidebar {
+      position: -webkit-sticky;
+      position: sticky;
+      top: 2rem;
+      align-self: start;
+      max-height: calc(100vh - 4rem);
+      overflow-y: auto;
+    }
+    
+    #doc-content h2 {
+      border-bottom: 1px solid var(--border-default-grey);
+      padding-bottom: 0.5rem;
+    }
+
+    /* Style pour les blocs de code en ligne */
+    #doc-content code {
+      background-color: var(--background-alt-grey);
+      color: var(--text-label-red-marianne);
+      padding: 0.2rem 0.4rem;
+      border-radius: 4px;
+      font-family: monospace;
+      font-size: 0.9em;
+    }
+
+    /* Style pour les blocs de code */
+    #doc-content pre code {
+      display: block;
+      padding: 1rem;
+      overflow-x: auto;
+      background-color: var(--background-flat-grey);
+      color: var(--text-default-grey);
+      border-left: 4px solid var(--border-default-blue-france);
+    }
+  </style>
+
+  <script src="https://cdn.jsdelivr.net/npm/@gouvfr/dsfr@1.12.0/dist/dsfr.min.js"></script>
+  <!-- Parser Markdown -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+
+  <!-- Header -->
+  <header class="fr-header" role="banner">
+    <div class="fr-container fr-container--fluid">
+      <div class="fr-header__body">
+        <div class="fr-header__body-row">
+          <div class="fr-header__brand">
+            <div class="fr-header__brand-top">
+              <a class="fr-header__branding" href="#" title="Accueil - Ministères économiques et financiers">
+                <div class="fr-header__logo">
+                  <p class="fr-logo">
+                    République
+                    <br>Française
+                  </p>
+                </div>
+                <p class="fr-header__operator">Ministères économiques et financiers</p>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="fr-main fr-my-4w" role="main">
+    <div class="fr-container">
+      <div class="fr-grid-row fr-grid-row--gutters">
+        
+        <!-- Sidebar - Table des matières -->
+        <aside class="fr-col-12 fr-col-md-3">
+          <div class="sticky-sidebar">
+            <nav class="fr-sidemenu" aria-labelledby="fr-sidemenu-title" style="box-shadow: none;">
+              <div class="fr-sidemenu__inner">
+                <button class="fr-sidemenu__btn" aria-controls="fr-sidemenu-wrapper" aria-expanded="false">
+                  Dans cette page
+                </button>
+                <div class="fr-collapse" id="fr-sidemenu-wrapper">
+                  <div class="fr-sidemenu__title" id="fr-sidemenu-title">Dans cette page</div>
+                  <ul class="fr-sidemenu__list" id="toc-list">
+                    <!-- Rempli dynamiquement en JS -->
+                  </ul>
+                </div>
+              </div>
+            </nav>
+          </div>
+        </aside>
+
+        <!-- Contenu du document -->
+        <article class="fr-col-12 fr-col-md-9">
+          <!-- Fil d'Ariane -->
+          <nav role="navigation" class="fr-breadcrumb fr-mb-3w" aria-label="vous êtes ici :">
+            <ol class="fr-breadcrumb__list">
+              <li>
+                <a class="fr-breadcrumb__link" href="index.html">Formulaire</a>
+              </li>
+              <li>
+                <a class="fr-breadcrumb__link" aria-current="page">Fiche pratique</a>
+              </li>
+            </ol>
+          </nav>
+
+          <!-- Zone de chargement -->
+          <div id="loading" class="fr-text--center fr-my-6w">
+            <p class="fr-text--lg">Chargement de la fiche pratique...</p>
+            <div class="fr-loading" style="margin: auto;"></div>
+          </div>
+
+          <!-- Conteneur du HTML généré -->
+          <div id="doc-content" class="fr-content" style="display: none;"></div>
+        </article>
+
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="fr-footer" role="contentinfo">
+    <div class="fr-container">
+      <div class="fr-footer__body">
+        <div class="fr-footer__brand">
+          <a href="#" title="Ministères économiques et financiers">
+            <p class="fr-logo">
+              République
+              <br>Française
+            </p>
+          </a>
+          <p class="fr-footer__operator-text">Ministères économiques et financiers</p>
+        </div>
+      </div>
+      <div class="fr-footer__content">
+        <p class="fr-footer__content-desc">
+          <a href="mailto:amd@finances.gouv.fr" target="_blank">Secrétariat Général - Service du Numérique - Bercy Hub</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Configuration de marked pour autoriser le HTML brut et gérer les sauts de ligne
+      marked.setOptions({
+        gfm: true,
+        breaks: true
+      });
+
+      // Fetch du fichier markdown
+      fetch('docs/accompagnement/fiche-pratique-catalogage.md')
+        .then(response => {
+          if (!response.ok) {
+            throw new Error('Impossible de charger le fichier markdown (statut: ' + response.status + ')');
+          }
+          return response.text();
+        })
+        .then(markdown => {
+          const rawHtml = marked.parse(markdown);
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = rawHtml;
+
+          // 1. Adapter la structure HTML aux classes DSFR
+          
+          // Titres
+          tempDiv.querySelectorAll('h1').forEach(el => {
+            el.classList.add('fr-h1', 'fr-mb-4w');
+          });
+          tempDiv.querySelectorAll('h2').forEach((el, index) => {
+            el.classList.add('fr-h2', 'fr-mt-6w', 'fr-mb-2w');
+            // Générer un ID unique pour l'ancre et la table des matières
+            const id = 'section-' + index;
+            el.id = id;
+          });
+          tempDiv.querySelectorAll('h3').forEach(el => {
+            el.classList.add('fr-h3', 'fr-mt-4w', 'fr-mb-2w');
+          });
+          tempDiv.querySelectorAll('h4').forEach(el => {
+            el.classList.add('fr-h4', 'fr-mt-3w', 'fr-mb-2w');
+          });
+
+          // Paragraphes
+          tempDiv.querySelectorAll('p').forEach(el => {
+            el.classList.add('fr-text--lg', 'fr-mb-2w');
+          });
+
+          // Listes
+          tempDiv.querySelectorAll('ul').forEach(el => {
+            el.classList.add('fr-pl-3w', 'fr-mb-3w');
+          });
+          tempDiv.querySelectorAll('ol').forEach(el => {
+            el.classList.add('fr-pl-3w', 'fr-mb-3w');
+          });
+
+          // Blockquotes (convertis en callouts DSFR)
+          tempDiv.querySelectorAll('blockquote').forEach(el => {
+            const callout = document.createElement('div');
+            callout.classList.add('fr-callout', 'fr-mb-3w');
+            callout.innerHTML = `<p class="fr-callout__text">${el.innerHTML}</p>`;
+            el.parentNode.replaceChild(callout, el);
+          });
+
+          // Tableaux (style DSFR requis avec un conteneur)
+          tempDiv.querySelectorAll('table').forEach(table => {
+            table.classList.add('fr-table__content');
+            
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('fr-table', 'fr-table--bordered', 'fr-table--layout-fixed', 'fr-mb-4w');
+            
+            table.parentNode.insertBefore(wrapper, table);
+            wrapper.appendChild(table);
+          });
+
+          // Séparateurs
+          tempDiv.querySelectorAll('hr').forEach(el => {
+            el.classList.add('fr-hr', 'fr-my-4w');
+          });
+
+          // Liens
+          tempDiv.querySelectorAll('a').forEach(el => {
+            el.classList.add('fr-link');
+          });
+
+          // 2. Générer la table des matières
+          const tocList = document.getElementById('toc-list');
+          const h2s = tempDiv.querySelectorAll('h2');
+          
+          h2s.forEach(h2 => {
+            const li = document.createElement('li');
+            li.classList.add('fr-sidemenu__item');
+            
+            const a = document.createElement('a');
+            a.classList.add('fr-sidemenu__link');
+            a.href = '#' + h2.id;
+            a.textContent = h2.textContent;
+            
+            li.appendChild(a);
+            tocList.appendChild(li);
+          });
+
+          // Si aucune table des matières (pas de H2), on peut masquer la sidebar
+          if (h2s.length === 0) {
+            document.querySelector('aside').style.display = 'none';
+            document.querySelector('article').className = 'fr-col-12';
+          }
+
+          // 3. Afficher le contenu
+          const docContent = document.getElementById('doc-content');
+          docContent.innerHTML = '';
+          docContent.appendChild(tempDiv);
+          
+          document.getElementById('loading').style.display = 'none';
+          docContent.style.display = 'block';
+        })
+        .catch(err => {
+          console.error(err);
+          const loadingDiv = document.getElementById('loading');
+          loadingDiv.innerHTML = `
+            <div class="fr-alert fr-alert--error fr-mb-4w">
+              <h3 class="fr-alert__title">Erreur</h3>
+              <p>Impossible de charger le contenu de la fiche pratique : ${err.message}</p>
+            </div>
+          `;
+        });
+    });
+  </script>
+</body>
+</html>
