@@ -2,7 +2,7 @@
 
 ## À quoi sert le catalogue ?
 
-Le catalogue de données du MEF est un classeur Grist partagé qui permet de cartographier, qualifier et mettre à disposition les jeux de données produits par les bureaux et directions des ministères économiques et financiers.
+Le catalogue de données des MEF est un classeur Grist partagé permettant de cartographier, qualifier et mettre à disposition les jeux de données produits par les bureaux et directions des ministères économiques et financiers.
 
 Il répond à trois enjeux :
 
@@ -12,12 +12,36 @@ Il répond à trois enjeux :
 
 Lien d'accès : [Catalogue Grist MEF](https://grist.numerique.gouv.fr/o/catalogue/fWWMJ5ZVPQ5o/Data-Catalog-MEF)
 
+## Pour le commanditaire (Chef de bureau / Direction)
+
+Cette section s'adresse au responsable de la publication au sein de l'entité. Elle définit le périmètre de la saisie et l'organisation interne pour mener à bien le catalogage.
+
+### Qu'est-ce qu'un "jeu de données" (périmètre) ?
+
+Un **jeu de données (dataset)** est une collection cohérente de données structurées (lignes/colonnes, fichiers connexes) répondant à une même thématique ou un même processus métier (ex: *Dépenses PLF 2025*, *Annuaire des entités*).
+
+*   **À cataloguer** : Les tables de données pérennes, les référentiels métiers, les bases de données de production ou d'études.
+*   **À ne pas cataloguer** : Les simples documents bureautiques de travail temporaire, les présentations PowerPoint, ou les rapports d'analyse textuels (sauf s'ils accompagnent un jeu de données en tant que pièce jointe).
+
+### Qui désigner dans mon équipe pour la saisie ?
+
+La saisie des métadonnées nécessite avant tout une **connaissance métier** de la donnée plutôt que des compétences techniques en informatique ou en data science.
+*   **Profil recommandé** : Un chargé d'études, un gestionnaire d'application ou un assistant administratif familier avec le sujet traité.
+*   **Compétences requises** : Savoir d'où vient la donnée, qui l'utilise, sa fréquence de mise à jour, et son niveau de sensibilité.
+
+### Circuit de validation et gouvernance
+
+1.  **Désignation** : Le commanditaire désigne le saisisseur et lui transmet les accès (via le kit d'onboarding).
+2.  **Saisie** : Le saisisseur remplit la fiche (idéalement jusqu'au Niveau 3 ou 4) et la laisse au statut `À vérifier (métier)` ou `En cours`.
+3.  **Validation interne** : Le commanditaire valide l'exactitude des métadonnées métiers.
+4.  **Qualification AMDAC** : La mission AMDAC [amd@finances.gouv.fr](mailto:amd@finances.gouv.fr) effectue un audit de qualité et passe le statut à `Qualifié` ou `Certifié`.
+
 ---
 
 ## Comment accéder au formulaire
 
 1. Ouvrir le lien ci-dessus dans votre navigateur.
-2. Dans la barre de tables (en haut à gauche de Grist), cliquer sur le bouton **Catalogue données** (widget formulaire).
+2. Dans la barre de tables (en haut à gauche de Grist), cliquer sur le bouton **Je veux saisir une donnée** (widget formulaire).
 3. Le formulaire s'ouvre. Deux modes sont disponibles :
 
 | Mode | Comportement |
@@ -31,7 +55,7 @@ Pour changer de mode, cliquer sur le bouton **Mode Avancé** / **Mode Express** 
 
 ## Structure du formulaire : 5 niveaux progressifs
 
-Le formulaire est divisé en 5 sections, chacune correspondant à un niveau de saturation des métadonnées. Vous pouvez vous arrêter à n'importe quel niveau, mais plus vous remplissez, plus vos données seront découvrables et fiables.
+Le formulaire est divisé en 5 sections, chacune correspondant à un niveau de saturation des métadonnées. Vous pouvez vous arrêter à n'importe quel niveau, mais plus vous remplissez, plus vos données seront découvrables et fiables, notamment par les IA !
 
 ### Niveau 1 — Identification (toujours visible)
 
@@ -46,15 +70,26 @@ C'est le minimum pour créer une fiche. Les champs marqués d'un astérisque (*)
 | **Description** | Zone de texte (4 lignes) | * | `Description` (Grist) |
 | **Mots-clés** | Texte libre (séparé par des virgules) | * | `Mots_Cles` (Grist) |
 
-**Astuce bureau producteur** : le champ accepte la frappe libre avec filtrage automatique. Tapez les premières lettres de votre bureau pour faire apparaître les correspondances dans l'arborescence. Le **point de contact service (BALF)** se remplit automatiquement à partir de la boîte fonctionnelle (BALF) du bureau sélectionné.
+**Astuce bureau producteur** : le champ accepte la frappe libre avec filtrage automatique. Tapez les premières lettres de votre bureau pour faire apparaître les correspondances dans l'arborescence. Le **point de contact service (BALF)** se remplit automatiquement à partir de la boîte fonctionnelle (BALF) du bureau sélectionné. Sinon, il faudra penser à le renseigner dans la table [Entités](https://grist.numerique.gouv.fr/o/data-catalog-mef/jRe26weQFnz8/Catalogue/p/26). 
 
-**Titre** : 5 à 10 mots, pas plus de 170 caractères. Doit être explicite et contenir un vocabulaire métier compréhensible. Selon la [Charte Open Data](https://data.economie.gouv.fr), préférer le tiret court au tiret bas pour les identifiants techniques.
+**Qu'est-ce qu'un bon Titre ?**
 
-**Description** : 300 à 500 caractères. Brève description du contenu et de l'objectif du jeu de données. Selon le modèle *Datasheets for Datasets*.
+*   **Longueur** : 5 à 10 mots, maximum 170 caractères.
+*   **Règle** : Il doit être explicite pour une personne externe à votre bureau. Évitez les acronymes internes non explicités.
+*   *Exemple à éviter* : `Base PLF final v2`
+*   *Exemple recommandé* : `Dépenses du Projet de Loi de Finances (PLF) par programme budgétaire`
 
-**Mots-clés** : 3 à 7 mots-clés thématiques, séparés par des virgules. Exemple : `fiscalité, dépenses, indicateur, 2025`.
+**Qu'est-ce qu'une bonne Description ?**
 
----
+*   **Longueur** : 300 à 500 caractères (environ un paragraphe).
+*   **Contenu** : Expliquez l'objectif du jeu de données, la population concernée, l'origine de la collecte et les éventuelles limites d'utilisation. Explicitez systématiquement les termes ou notions techniques complexes.
+*   *Exemple recommandé* : `Ce jeu de données retrace l'ensemble des crédits de paiement et des autorisations d'engagement votés dans le cadre du Projet de Loi de Finances (PLF) pour l'année civile. Il détaille les montants par programme budgétaire et par ministère, permettant de suivre les orientations budgétaires de l'État.`
+
+**Qu'est-ce qu'un bon ensemble de Mots-clés ?**
+
+*   **Quantité** : 3 à 7 mots-clés, séparés par des virgules.
+*   **Règle** : Utilisez des termes génériques et des synonymes usuels.
+*   *Exemple recommandé* : `fiscalité, budget de l'Etat, plf, dépenses publiques, comptabilité publique`
 
 ### Niveau 2 — Classification (accordéon)
 
@@ -70,8 +105,6 @@ Qualifie le jeu de données pour le tri et les filtres.
 | **Période de couverture (Début)** | Sélecteur de date | Format `AAAA-MM-JJ` | `Periode_de_couverture_Date_de_debut` (Grist) |
 | **Période de couverture (Fin)** | Sélecteur de date | Format `AAAA-MM-JJ` | `Periode_de_couverture_Date_de_fin` (Grist) |
 
----
-
 ### Niveau 3 — Organisation (accordéon)
 
 Rattache le dataset à la structure ministérielle et aux systèmes d'information.
@@ -84,8 +117,6 @@ Rattache le dataset à la structure ministérielle et aux systèmes d'informatio
 | **Système d'information** | Liste à sélection multiple | `Systeme_d_Information` → Ref_InformationSystem |
 | **Date de publication** | Sélecteur de date | `Date_Publication` (Grist) |
 | **Dernière mise à jour** | Sélecteur de date | `Date_MaJ` (Grist) |
-
----
 
 ### Niveau 4 — Technique & Distribution (accordéon)
 
@@ -101,8 +132,6 @@ Détails d'accès physique et informations techniques.
 | **URL Open Data** | URL | `URL_Open_Data` (Grist) |
 
 > **Par défaut** : la **Licence Ouverte v2.0 (Etalab)** est recommandée pour tous les datasets ouverts (cf. [Charte Open Data](https://data.economie.gouv.fr)).
-
----
 
 ### Niveau 5 — Qualification (accordéon)
 
@@ -192,6 +221,28 @@ Le score change en temps réel : chaque champ rempli fait monter le pourcentage.
 
 ---
 
+## ❓ Foire Aux Questions (FAQ) pour les novices
+
+> [!NOTE]
+> Cette section rassemble les réponses aux questions les plus fréquentes posées lors de la prise en main de l'outil.
+
+### 1. Statut de publication vs Niveau de sensibilité : quelle différence ?
+
+*   **Statut de publication** : C'est le statut de la donnée vis-à-vis de sa mise à disposition générale (`Données ouvertes`, `Données fermées`, `Données réglementées`).
+*   **Niveau de sensibilité** : C'est la nature de la protection juridique ou de sécurité requise (`Open data`, `Diffusion restreinte`, `Confidentiel`).
+*   *Exemple* : Un jeu de données contenant des informations confidentielles ou personnelles doit avoir un niveau de sensibilité `Données personnelles (RGPD)` ou `Confidentiel`, et un statut de publication à `Données fermées`.
+
+### 2. Si je mets "Diffusion restreinte", ma donnée est-elle visible par tout le monde ?
+
+**Non**. Le fait de renseigner une fiche de métadonnées dans le catalogue permet aux autres agents de savoir que le jeu de données **existe** (découvrabilité) et de savoir **qui contacter** pour en demander l'accès. Toutefois, les données elles-mêmes (fichiers sources) ne sont en aucun cas publiées ou rendues accessibles sans autorisation.
+
+### 3. Pourquoi me demande-t-on deux types d'URL ?
+
+*   **URL du dataset** : Pointeur vers la page d'information, le portail ou l'application métier d'origine (ex: page de présentation Alizée).
+*   **URL de téléchargement direct** : Lien direct permettant de télécharger le fichier brut (ex: lien `.csv`, `.xlsx`, ou API). Si la donnée n'est pas téléchargeable en un clic, laissez ce champ vide.
+
+---
+
 ## Conventions de nommage (Charte Open Data)
 
 La [Charte Open Data des ministères économiques et financiers](https://data.economie.gouv.fr) impose des règles précises pour les noms et identifiants des jeux de données publiés sur **data.economie.gouv.fr** (plateforme Opendatasoft).
@@ -242,6 +293,28 @@ Si le schéma évolue trop entre les années, il est acceptable de créer un dat
 ### Licence par défaut
 
 La licence par défaut est la **Licence Ouverte v2.0 (Etalab)**. Elle est recommandée pour tous les datasets ouverts.
+
+---
+
+## ⚡ Pour aller plus loin (Profils Expérimentés / Data)
+
+Cette section s'adresse aux administrateurs de données, correspondants data, et agents habitués aux concepts d'architecture de données.
+
+### Rôle et articulation du catalogue Grist
+
+Le catalogue Grist MEF sert de **point d'entrée unique et de pivot** pour le référencement du patrimoine de données.
+*   **Moissonnage & Standardisation** : Les métadonnées saisies respectent le standard **DCAT-AP**.
+*   **Lien Opendatasoft (ODS) / data.gouv.fr** : Le catalogue Grist sera synchronisé périodiquement avec les plateformes de publication open data. Les fiches qualifiées `Données ouvertes` y seront automatiquement indexées.
+*   **Éviter la double saisie** : Les fiches en provenance de ces plateformes seront chargées en lecture seule pour éviter tout conflit de version. Les mises à jour s'effectueront à la source.
+
+### Gouvernance et évolution
+
+L'outil est collaboratif. Si vous souhaitez :
+*   Proposer des évolutions de schémas (nouveaux champs, nouvelles listes de référence).
+*   Suggérer des intégrations d'API ou de flux automatisés.
+*   Rejoindre la communauté des correspondants data du MEF.
+
+Contactez l'administrateur système (AMDAC) via le canal Tchap ou l'adresse [amd@finances.gouv.fr](mailto:amd@finances.gouv.fr).
 
 ---
 
